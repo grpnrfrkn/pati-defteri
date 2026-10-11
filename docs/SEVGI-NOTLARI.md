@@ -37,7 +37,7 @@ Notlar tek bir kütüphanede tutulur ve bağlama göre **rastgele** seçilir.
 
 ## Çiçek verme
 
-Uygulama aracılığıyla ona çiçek verebilmeliyim.
+Uygulama benim adıma ona çiçek verir. Çiçekleri ben anlık göndermem; uygulamayı kullanırken **rastgele zamanlarda** karşısına çıkar. Benim için ayrı bir hesap veya gönderme ekranı yoktur.
 
 * Çiçek, uygulamada küçük bir sürpriz olarak karşısına çıkar (ör. “Sana bir çiçek var 🌷”), isteğe bağlı kısa bir notla birlikte.
 * Gelen çiçekler bir yerde birikebilir (ör. bir vazo / çiçek defteri) veya kedinin odasına konabilir.
@@ -49,8 +49,16 @@ Uygulama aracılığıyla ona çiçek verebilmeliyim.
 * Sıklık ayarlı olmalı; her dokunuşta not çıkarsa etkisi kaybolur.
 * Çiçekler ve notlar XP veya pati parası kazandırmaz (pati parası yalnızca görevlerden gelir).
 
+## Gizlilik
+
+Repo herkese açık olduğu için notlar repoda okunabilir hâlde durmaz.
+
+* Notların düz metni yalnızca benim bilgisayarımda durur ve repoya gönderilmez.
+* Repoya, uygulama parolasıyla şifrelenmiş hâli konur. Uygulama, parola girildiğinde notları cihazda çözer.
+* Not eklemek veya değiştirmek için: düz metin dosyasını düzenle, yeniden şifrele, yayınla.
+* Parola değişirse notların yeniden şifrelenmesi gerekir. Parola kısa olursa şifre deneme yoluyla kırılabilir; bu kabul edilmiş bir risktir.
+
 ## Açık kararlar
 
-* **Notlar nerede saklanacak?** Repo herkese açık olduğu için koda yazılan notları herkes (o da dahil) okuyabilir. Veritabanında tutulursa hem gizli kalır hem de uygulamayı yeniden yayınlamadan yeni not eklenebilir.
-* **Çiçek nasıl gönderilecek?** Anlık göndermek için benim de bir hesabım / gönderme ekranım olması gerekir. Alternatif: önceden hazırlanmış çiçeklerin rastgele günlerde çıkması.
+* **Parola:** ne olacağı ve biçimi (ona teyit edilecek).
 * **Hitap:** notlarda ona nasıl seslenileceği (isim, lakap).

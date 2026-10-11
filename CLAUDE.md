@@ -19,5 +19,8 @@ Bir özelliğe başlamadan önce ilgili bölümü oku. Kabul ölçütleri GEREKS
 
 ## Barındırma
 
-* Site: GitHub Pages (statik). Sunucu tarafı gerektiren her şey (hesap, eşitleme, bildirim) harici bir servis üzerinden çözülür.
+* Kullanıcının telefonu iPhone: uygulama ana ekrana eklenerek kullanılacak; bildirimler iOS'ta yalnızca bu şekilde çalışır.
+
+* Site: GitHub Pages (statik). İlk sürümde **arka uç yok**: veriler cihazda saklanır, hesap yerine tek bir açılış parolası vardır. Eşitleme, bulut ve kapalıyken bildirim ertelendi; bkz. [docs/SONRAYA-BIRAKILANLAR.md](docs/SONRAYA-BIRAKILANLAR.md). Kullanıcı istemeden bunları ekleme, ama veri yapısını sonradan eklenebilecek şekilde tut.
+* Sevgi notlarının düz metni repoya girmez; yalnızca parolayla şifrelenmiş hâli girer. Teknik kararlar: [docs/TEKNIK-TASARIM.md](docs/TEKNIK-TASARIM.md).
 * Hedef: sürpriz ücret çıkmaması. Kredi kartı gerektiren veya kullanım aşımında otomatik ücretlendiren bir plan/servis eklemeden önce kullanıcıya sor.

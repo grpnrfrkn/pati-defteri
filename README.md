@@ -8,3 +8,5 @@ Durum: planlama aşamasında, henüz uygulama kodu yok.
 
 * [Gereksinimler](docs/GEREKSINIMLER.md)
 * [Sevgi notları ve çiçekler](docs/SEVGI-NOTLARI.md)
+* [Sonraya bırakılanlar](docs/SONRAYA-BIRAKILANLAR.md)
+* [Teknik tasarım](docs/TEKNIK-TASARIM.md)
