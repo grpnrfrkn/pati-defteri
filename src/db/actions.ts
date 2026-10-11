@@ -1,5 +1,21 @@
+import { todayISO } from '../domain/dates'
 import { SINGLE } from '../domain/derive'
-import type { Category, Difficulty, ISODate, Item, Occurrence, Priority, Recurrence, Subtask, Task, TaskEvent } from '../domain/types'
+import { REWARDS, rewardFor } from '../domain/rewards'
+import type {
+  Cat,
+  Category,
+  Difficulty,
+  Flower,
+  ISODate,
+  Item,
+  LedgerEntry,
+  Occurrence,
+  Priority,
+  Recurrence,
+  Subtask,
+  Task,
+  TaskEvent,
+} from '../domain/types'
 import { db } from './db'
 
 /** Bir işlemi geri alır ve geri alındığını geçmişe yazar. */
@@ -146,6 +162,27 @@ function blankOcc(item: Item): Occurrence {
 }
 
 /**
+ * Gerçekleşmenin ödül kayıtlarını durumuyla eşitler: tamamlandıysa görev ödülü,
+ * işaretli her alt görev için küçük ödül. Var olan kayıt yeniden yazılmaz (iki kez
+ * ödül olmaz), artık hak edilmeyen kayıt silinir (geri alma tutarlı kalır).
+ */
+async function syncRewards(task: Task, occKey: string, occ: Occurrence | undefined) {
+  const wanted = new Map<string, Pick<LedgerEntry, 'kind' | 'xp' | 'pati'>>()
+  if (occ?.status === 'done') wanted.set(`gorev:${occKey}`, { kind: 'task', ...rewardFor(task) })
+  for (const subId of Object.keys(occ?.doneSubtasks ?? {})) {
+    wanted.set(`altgorev:${occKey}:${subId}`, { kind: 'subtask', ...REWARDS.subtask })
+  }
+  const existing = await db.ledger.where('occId').equals(occKey).toArray()
+  const have = new Set(existing.map((e) => e.id))
+  await db.ledger.bulkDelete(existing.filter((e) => !wanted.has(e.id)).map((e) => e.id))
+  await db.ledger.bulkAdd(
+    [...wanted]
+      .filter(([id]) => !have.has(id))
+      .map(([id, reward]) => ({ id, occId: occKey, ...reward, day: todayISO(), at: now(), label: task.title })),
+  )
+}
+
+/**
  * Bir gerçekleşme üzerindeki her değişiklik buradan geçer: görev ve gerçekleşme
  * tek işlemde yazılır, önceki hâlleri geri alma için saklanır.
  */
@@ -154,7 +191,7 @@ async function mutate(
   label: string,
   change: (rows: { task: Task; occ: Occurrence }) => Omit<TaskEvent, 'id' | 'at' | 'taskId' | 'occId'>,
 ): Promise<Undo> {
-  const tables = [db.tasks, db.occurrences, db.events]
+  const tables = [db.tasks, db.occurrences, db.events, db.ledger]
   let prevTask: Task | undefined
   let prevOcc: Occurrence | undefined
   await db.transaction('rw', tables, async () => {
@@ -167,6 +204,7 @@ async function mutate(
     task.updatedAt = occ.updatedAt = now()
     await db.tasks.put(task)
     await db.occurrences.put(occ)
+    await syncRewards(task, item.key, occ)
     await logEvent({ ...event, taskId: task.id, occId: item.key })
   })
   return () =>
@@ -174,6 +212,7 @@ async function mutate(
       await db.tasks.put(prevTask!)
       if (prevOcc) await db.occurrences.put(prevOcc)
       else await db.occurrences.delete(item.key)
+      await syncRewards(prevTask!, item.key, prevOcc)
       await logEvent({ taskId: item.task.id, occId: item.key, type: 'undone', detail: label })
     })
 }
@@ -301,7 +340,20 @@ export async function setMeta(key: string, value: unknown): Promise<void> {
   await db.meta.put({ key, value })
 }
 
-const BACKUP_TABLES = ['tasks', 'subtasks', 'occurrences', 'events', 'categories', 'meta'] as const
+export async function saveCat(cat: Cat): Promise<void> {
+  await db.meta.put({ key: 'cat', value: cat })
+}
+
+export async function addFlower(kind: string, note: string): Promise<Flower> {
+  const flower: Flower = { id: uid(), kind, note, at: now() }
+  await db.transaction('rw', db.meta, async () => {
+    const list = ((await db.meta.get('flowers'))?.value as Flower[] | undefined) ?? []
+    await db.meta.put({ key: 'flowers', value: [...list, flower] })
+  })
+  return flower
+}
+
+const BACKUP_TABLES = ['tasks', 'subtasks', 'occurrences', 'events', 'categories', 'meta', 'ledger'] as const
 
 export async function exportBackup(): Promise<string> {
   const data: Record<string, unknown[]> = {}

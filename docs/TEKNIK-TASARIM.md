@@ -33,7 +33,7 @@ Her kayıtta `id` (rastgele, kalıcı), `updatedAt` ve `deletedAt` bulunur (sonr
 ## Ödüllerin iki kez verilmemesi
 
 * Her ödülün kimliği, neye verildiğinden türetilir: `gorev:<gerçekleşme>`, `altgorev:<alt görev>`, `bitirme:<gerçekleşme>`. Aynı kimlikle ikinci kayıt yazılamaz.
-* Bakiye ve XP ayrı bir sayı olarak tutulmaz; `ledger` toplamından hesaplanır. Tamamlama geri alınınca ilgili kayıt ters kayıtla kapatılır, toplam kendiliğinden düzelir.
+* Bakiye ve XP ayrı bir sayı olarak tutulmaz; `ledger` toplamından hesaplanır. Her değişiklikten sonra gerçekleşmenin ödül kayıtları durumuyla eşitlenir: hak edilen ama olmayan kayıt eklenir, artık hak edilmeyen kayıt silinir. Böylece tamamlamayı geri almak da, geri almayı geri almak da toplamı kendiliğinden düzeltir.
 * Satın alma, bakiyeyi kontrol eden ve envantere ekleyen tek bir işlemdir; çift dokunuş ikinci satın almayı oluşturmaz.
 * Ödül miktarları tek bir yapılandırma dosyasındadır.
 
@@ -68,3 +68,12 @@ Gereksinimde açık olmayan, davranışı etkileyen kararlar:
 * **Hatırlatmalar:** uygulama açıkken, saati gelen ve o gün bekleyen işler için ekranda gösterilir. Saati bir saatten fazla geçmiş hatırlatma gösterilmez. Kapalıyken bildirim ertelenenler arasındadır.
 * **Günü Toparla:** gün sonu saati (varsayılan 21:00) Diğer > Ayarlar'dan değişir. Saat geldiğinde uygulama açıksa kendiliğinden açılır; "Daha sonra" denirse bir saat boyunca kendiliğinden gelmez. Bir gün kapatılmadan geçtiyse ve bekleyen iş kaldıysa ertesi açılışta o gün için sunulur. Özetteki XP ve pati parası Aşama 3'te eklenecek.
 * **Takvim:** günler `itemsForDate` ile hesaplanır; tarihsiz görevler takvimde görünmez.
+
+## Aşama 3 notları
+
+* **Ödül miktarları:** `src/domain/rewards.ts` içindeki `REWARDS`. Süre girilmemiş görev 10 XP; 5 dk 6, 10 dk 8, 15 dk 10, 30 dk 15, 60 dk 22, daha uzunu 30 XP. Orta zorluk ×1,3, zor ×1,6. Pati, XP'nin yarısı (en az 3). Alt görev başına 3 XP ve 1 pati. Görev ayrıntısında ve Kedim sayfasında kullanıcıya gösterilir.
+* **Seviyeler:** seviye N için toplam `20·N·(N−1)` XP (40, 120, 240, 400 …). Yavru 1–4, genç 5–9, yetişkin 10+. Büyüme yalnızca XP'ye bağlıdır.
+* **Kedi:** ad, tüy rengi, göz rengi ve desen `meta` içinde tek kayıttır; çizim bu değerlerden ve aşamadan üretilen bir SVG'dir, bu yüzden görünüm aşamalar arasında korunur. Kedi oluşturulmadan kazanılan XP birikir ve sahiplenince onun olur.
+* **Etkileşimler:** sev, besle, oyna, uyut baştan açık; "gerin" gençken, "yuvarlan" yetişkinken açılır. Hiçbiri ödül vermez. Açlık, mutsuzluk, ihmal gibi bir durum hiç tutulmaz.
+* **Kutlamalar:** küçük görevde bildirim satırı ve işaret animasyonu; büyük görevde (alt görevli, uzun vadeli ya da 60 dk ve üzeri) ve seviye atlamada 3 saniyelik, dokunmayı engellemeyen kutlama.
+* **Sesler:** tarayıcıda üretilir; Kedim sayfasından kapatılabilir.

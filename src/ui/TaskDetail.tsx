@@ -1,6 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { completeItem, deleteTask, toggleSubtask, uncompleteItem } from '../db/actions'
+import { rewardFor } from '../domain/rewards'
+import { completeAndCheer } from './complete'
 import { db } from '../db/db'
 import { addDays, formatDay, formatLong, relativeDay } from '../domain/dates'
 import { buildItem, occId } from '../domain/derive'
@@ -19,7 +21,8 @@ export function TaskDetail({
   originalDate: string
   onClose: () => void
 }) {
-  const { data, today, act, open } = useApp()
+  const ctx = useApp()
+  const { data, today, act, open } = ctx
   const [confirmDelete, setConfirmDelete] = useState(false)
   const events = useLiveQuery(() => db.events.where('taskId').equals(taskId).sortBy('at'), [taskId])
 
@@ -39,7 +42,8 @@ export function TaskDetail({
     .sort()
     .at(-1)
 
-  const complete = (on = today) => act(() => completeItem(item, on), 'Tamamlandı 🐾')
+  const complete = () => completeAndCheer(ctx, item, subs.length)
+  const reward = rewardFor(task)
 
   return (
     <Sheet title={task.title} onClose={onClose}>
@@ -86,6 +90,12 @@ export function TaskDetail({
               <dd>{DIFFICULTY[task.difficulty]}</dd>
             </div>
           )}
+          <div>
+            <dt>Ödül</dt>
+            <dd>
+              +{reward.xp} XP · +{reward.pati} pati
+            </dd>
+          </div>
           {task.longTerm && (
             <div>
               <dt>Tür</dt>

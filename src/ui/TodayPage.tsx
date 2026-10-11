@@ -24,6 +24,7 @@ import type { Item, Priority, Section } from '../domain/types'
 import { useApp } from './context'
 import { EffortControls, useSessionState } from './EffortControls'
 import { PRIORITY } from './labels'
+import { openingNote } from './love'
 import { MoveActions } from './MoveActions'
 import { TaskRow } from './TaskRow'
 
@@ -198,6 +199,7 @@ export function TodayPage() {
   const [collapsed, setCollapsed] = useState<Section[]>(loadCollapsed)
   const [effort, setEffort] = useSessionState<EffortFilter>('pati.bugun.enerji', NO_EFFORT)
   const [energyOpen, setEnergyOpen] = useState(false)
+  const [greeting, setGreeting] = useState(() => openingNote(today))
 
   const snap = { tasks: data.tasks, occs: data.occs }
   const allItems = itemsForDate(snap, today)
@@ -227,6 +229,12 @@ export function TodayPage() {
           </p>
         )}
       </header>
+
+      {greeting && (
+        <button className="love-note opening" onClick={() => setGreeting(null)} aria-label={`${greeting} (kapat)`}>
+          💌 {greeting}
+        </button>
+      )}
 
       {allItems.length > 0 && (
         <div className="row-actions">

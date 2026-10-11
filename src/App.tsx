@@ -4,8 +4,11 @@ import { seedDefaults, type Undo } from './db/actions'
 import { db } from './db/db'
 import { addDays, nowHM, todayISO } from './domain/dates'
 import { itemsForDate } from './domain/derive'
-import type { ISODate } from './domain/types'
-import { AppContext, type AppCtx, type AppData, type SheetState } from './ui/context'
+import { progressFor, xpToReach } from './domain/rewards'
+import type { Cat, Flower, ISODate } from './domain/types'
+import { CatPage } from './ui/CatPage'
+import { maybeGiveFlower } from './ui/complete'
+import { AppContext, type AppCtx, type AppData, type CelebrationInfo, type SheetState } from './ui/context'
 import { DayReview } from './ui/DayReview'
 import { MorePage } from './ui/MorePage'
 import { Onboarding } from './ui/Onboarding'
@@ -34,16 +37,22 @@ interface Toast {
   id: number
   message: string
   undo?: Undo
+  /** Mesajın altında çıkan küçük sevgi notu. */
+  note?: string | null
 }
+
+/** Kutlamalar kısa sürer ve dokunmayı engellemez. */
+const CELEBRATION_MS = 3200
 
 function useData(): AppData | undefined {
   return useLiveQuery(async () => {
-    const [tasksAll, subtasks, occs, categories, metaRows] = await Promise.all([
+    const [tasksAll, subtasks, occs, categories, metaRows, ledger] = await Promise.all([
       db.tasks.toArray(),
       db.subtasks.toArray(),
       db.occurrences.toArray(),
       db.categories.toArray(),
       db.meta.toArray(),
+      db.ledger.toArray(),
     ])
     const meta = new Map(metaRows.map((m) => [m.key, m.value]))
     return {
@@ -54,6 +63,11 @@ function useData(): AppData | undefined {
       categories: categories.filter((c) => !c.deletedAt).sort((a, b) => a.order - b.order),
       onboarded: !!meta.get('onboarded'),
       dayEndTime: typeof meta.get('dayEndTime') === 'string' ? (meta.get('dayEndTime') as string) : DEFAULT_DAY_END,
+      ledger,
+      xp: ledger.reduce((sum, e) => sum + e.xp, 0),
+      pati: ledger.reduce((sum, e) => sum + e.pati, 0),
+      cat: (meta.get('cat') as Cat | undefined) ?? null,
+      flowers: (meta.get('flowers') as Flower[] | undefined) ?? [],
       reviewedDays: new Set(
         metaRows.filter((m) => m.key.startsWith('review:') && m.value === 'done').map((m) => m.key.slice(7)),
       ),
@@ -97,6 +111,8 @@ function dueReview(data: AppData, today: ISODate, now: string): ISODate | null {
   return used && items.some((i) => i.status === 'pending') ? yesterday : null
 }
 
+const stageAt = (level: number) => progressFor(xpToReach(level)).stage
+
 function ComingSoon({ title, text }: { title: string; text: string }) {
   return (
     <div className="page">
@@ -119,6 +135,8 @@ export function App() {
   const [toast, setToast] = useState<Toast | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [reviewSnoozedUntil, setReviewSnoozedUntil] = useState(0)
+  const [celebration, setCelebration] = useState<(CelebrationInfo & { id: number }) | null>(null)
+  const celebrationTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
     seedDefaults().catch(() => setToast({ id: Date.now(), message: 'Veriler bu cihazda açılamadı.' }))
@@ -126,18 +144,25 @@ export function App() {
     navigator.storage?.persist?.().catch(() => {})
   }, [])
 
-  const notify = useCallback((message: string, undo?: Undo) => {
+  const notify = useCallback((message: string, undo?: Undo, note?: string | null) => {
     clearTimeout(toastTimer.current)
     const id = Date.now()
-    setToast({ id, message, undo })
+    setToast({ id, message, undo, note })
     toastTimer.current = setTimeout(() => setToast((t) => (t?.id === id ? null : t)), 5000)
   }, [])
 
+  const celebrate = useCallback((info: CelebrationInfo) => {
+    clearTimeout(celebrationTimer.current)
+    const id = Date.now()
+    setCelebration({ ...info, id })
+    celebrationTimer.current = setTimeout(() => setCelebration((c) => (c?.id === id ? null : c)), CELEBRATION_MS)
+  }, [])
+
   const act = useCallback<AppCtx['act']>(
-    async (fn, message) => {
+    async (fn, message, note) => {
       try {
         const result = await fn()
-        if (message) notify(message, typeof result === 'function' ? (result as Undo) : undefined)
+        if (message) notify(message, typeof result === 'function' ? (result as Undo) : undefined, note)
         return true
       } catch (error) {
         console.error(error)
@@ -149,8 +174,8 @@ export function App() {
   )
 
   const ctx = useMemo<AppCtx | null>(
-    () => (data ? { data, today, open: setSheet, act, notify } : null),
-    [data, today, act, notify],
+    () => (data ? { data, today, open: setSheet, act, notify, celebrate } : null),
+    [data, today, act, notify, celebrate],
   )
 
   // Günü Toparla'yı kendiliğinden sun; başka bir pencere açıkken araya girme.
@@ -158,6 +183,33 @@ export function App() {
   useEffect(() => {
     if (review && !sheet && Date.now() >= reviewSnoozedUntil) setSheet({ type: 'review', date: review })
   }, [review, sheet, reviewSnoozedUntil, now])
+
+  // Seviye atlayınca kutla. İlk yüklemede ve kedi yokken kutlama yapılmaz.
+  const level = data ? progressFor(data.xp).level : null
+  const lastLevel = useRef<number | null>(null)
+  useEffect(() => {
+    if (level == null || !data) return
+    const before = lastLevel.current
+    lastLevel.current = level
+    if (before == null || level <= before || !data.cat) return
+    const { stage, stageLabel } = progressFor(data.xp)
+    const grew = stage !== stageAt(before)
+    celebrate({
+      emoji: grew ? '🐈' : '✨',
+      title: `Seviye ${level}!`,
+      text: grew
+        ? `${data.cat.name} büyüdü: artık ${stageLabel.toLocaleLowerCase('tr')} bir kedi.`
+        : `${data.cat.name} seninle gurur duyuyor.`,
+    })
+  }, [level, data, celebrate])
+
+  // Uygulama açıldığında, ara sıra bir çiçek.
+  const greeted = useRef(false)
+  useEffect(() => {
+    if (!ctx || greeted.current || !ctx.data.onboarded) return
+    greeted.current = true
+    if (ctx.data.tasksAll.length > 0) maybeGiveFlower(ctx).catch(() => {})
+  }, [ctx])
 
   if (!ctx) return null
 
@@ -194,7 +246,7 @@ export function App() {
             <Reminders now={now} />
             {tab === 'bugun' && <TodayPage />}
             {tab === 'gorevler' && <TasksPage />}
-            {tab === 'kedim' && <ComingSoon title="Kedim" text="Minik kedin yolda 🐾" />}
+            {tab === 'kedim' && <CatPage />}
             {tab === 'magaza' && <ComingSoon title="Mağaza" text="Raflar diziliyor ✿" />}
             {tab === 'diger' && <MorePage />}
           </main>
@@ -217,9 +269,31 @@ export function App() {
 
       {sheet?.type === 'review' && <DayReview date={sheet.date} onLater={closeReview} onFinished={closeReview} />}
 
+      {celebration && (
+        <div className="celebration" role="status" key={celebration.id}>
+          <div className="confetti" aria-hidden>
+            {Array.from({ length: 14 }, (_, i) => (
+              <span key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 7) * 0.12}s` }}>
+                {['🌸', '🐾', '✨', '💜'][i % 4]}
+              </span>
+            ))}
+          </div>
+          <div className="celebration-card">
+            <span className="celebration-emoji" aria-hidden>
+              {celebration.emoji}
+            </span>
+            <strong>{celebration.title}</strong>
+            {celebration.text && <span>{celebration.text}</span>}
+          </div>
+        </div>
+      )}
+
       {toast && (
         <div className="toast" role="status">
-          <span>{toast.message}</span>
+          <span>
+            {toast.message}
+            {toast.note && <small>{toast.note}</small>}
+          </span>
           {toast.undo && (
             <button
               onClick={() => {

@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
-import { completeItem, uncompleteItem } from '../db/actions'
+import { uncompleteItem } from '../db/actions'
 import { formatDay } from '../domain/dates'
 import { describeRecurrence } from '../domain/recurrence'
 import type { Item } from '../domain/types'
+import { completeAndCheer } from './complete'
 import { categoryName, subtasksOf, useApp } from './context'
 import { formatMinutes, PRIORITY } from './labels'
 
@@ -17,7 +18,8 @@ interface Props {
 }
 
 export function TaskRow({ item, handle, extra, hideCheck, children }: Props) {
-  const { data, today, act, open } = useApp()
+  const ctx = useApp()
+  const { data, act, open } = ctx
   const { task } = item
   const done = item.status === 'done'
   const subs = subtasksOf(data, task.id)
@@ -25,7 +27,7 @@ export function TaskRow({ item, handle, extra, hideCheck, children }: Props) {
   const category = categoryName(data, task.categoryId)
 
   const toggle = () =>
-    act(() => (done ? uncompleteItem(item) : completeItem(item, today)), done ? 'Geri alındı' : 'Tamamlandı 🐾')
+    done ? act(() => uncompleteItem(item), 'Geri alındı') : completeAndCheer(ctx, item, subs.length)
 
   return (
     <div className={`task${done ? ' done' : ''}`}>

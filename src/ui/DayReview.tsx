@@ -2,8 +2,11 @@ import { useState } from 'react'
 import { moveItem, setMeta, skipItem, unscheduleItem, type Undo } from '../db/actions'
 import { addDays, formatDay } from '../domain/dates'
 import { itemsForDate } from '../domain/derive'
+import { progressFor } from '../domain/rewards'
 import type { ISODate, Item } from '../domain/types'
+import { CatSvg } from './CatSvg'
 import { useApp } from './context'
+import { pickNote } from './love'
 import { MoveActions } from './MoveActions'
 import { Sheet } from './Sheet'
 
@@ -17,6 +20,10 @@ export function DayReview({ date, onLater, onFinished }: { date: ISODate; onLate
   const { data, today, act } = useApp()
   const [selected, setSelected] = useState<string[]>([])
   const [choosing, setChoosing] = useState<string | null>(null)
+  const [note] = useState(() => pickNote('gun-sonu'))
+  const earned = data.ledger.filter((e) => e.day === date)
+  const xp = earned.reduce((sum, e) => sum + e.xp, 0)
+  const pati = earned.reduce((sum, e) => sum + e.pati, 0)
 
   const items = itemsForDate({ tasks: data.tasks, occs: data.occs }, date)
   const done = items.filter((i) => i.status === 'done')
@@ -47,9 +54,17 @@ export function DayReview({ date, onLater, onFinished }: { date: ISODate; onLate
         </p>
 
         <section className="card panel stack">
+          {data.cat && (
+            <div className="cat-mini">
+              <CatSvg cat={data.cat} stage={progressFor(data.xp).stage} action={done.length > 0 ? 'pet' : 'idle'} />
+            </div>
+          )}
           <p>
             <strong>{done.length}</strong> iş tamamlandı.
             {done.length > 0 ? ' Minik bir adım da ilerlemedir 🐾' : ' Dinlenmek de günün bir parçası.'}
+          </p>
+          <p className="earned">
+            +{xp} XP · +{pati} pati
           </p>
           {done.length > 0 && (
             <ul className="done-list">
@@ -119,6 +134,8 @@ export function DayReview({ date, onLater, onFinished }: { date: ISODate; onLate
             )}
           </section>
         )}
+
+        {note && <p className="love-note">💌 {note}</p>}
 
         <div className="form-actions">
           <button className="btn ghost" onClick={onLater}>

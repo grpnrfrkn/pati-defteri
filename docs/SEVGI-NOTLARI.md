@@ -61,3 +61,19 @@ Uygulamada parola yok (kullanıcı istemedi), bu yüzden notlar gerçek anlamda 
 ## Açık kararlar
 
 * **Hitap:** notlarda ona nasıl seslenileceği (isim, lakap).
+
+## Nasıl çalışıyor (uygulanan hâli)
+
+* Notların düz metni `notlar/sevgi-notlari.json` dosyasındadır; bu klasör `.gitignore` içindedir.
+* Not ekledikten ya da değiştirdikten sonra `npm run notlar` çalıştırılır; bu, repoya giren `src/data/notlar.ts` dosyasını yeniden üretir. Sonra commit ve push.
+* Düz metin dosyası kaybolursa `npm run notlar:coz` onu kodlanmış dosyadan geri üretir.
+* Sıklıklar `src/ui/love.ts` ve `src/ui/complete.ts` içindedir:
+  * Açılış notu günde bir kez seçilir ve o gün Bugün ekranının üstünde durur; dokununca kapanır.
+  * Görev tamamlanınca dörtte bir ihtimalle bildirimin altında bir not çıkar.
+  * Büyük kutlamada ve Günü Toparla'da her seferinde bir not vardır.
+  * Kedim sayfasında yaklaşık üç girişten birinde bir not görünür.
+  * Bir bağlamda son gösterilen üç not tekrar seçilmez.
+* Çiçekler: uygulama açıldığında ya da bir görev tamamlandığında dörtte bir ihtimalle, ama en az iki gün arayla gelir. Gelen çiçekler notlarıyla birlikte Kedim sayfasında "Çiçeklerim" altında birikir.
+* Aynı anda tek sürpriz gösterilir: büyük kutlama, not ya da çiçek.
+
+**Durum:** şu anki notlar taslaktır (bu belgedeki ton örneklerinden türetildi). Link paylaşılmadan önce gözden geçirilip kişiselleştirilmelidir.

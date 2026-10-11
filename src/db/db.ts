@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Category, Occurrence, Subtask, Task, TaskEvent } from '../domain/types'
+import type { Category, LedgerEntry, Occurrence, Subtask, Task, TaskEvent } from '../domain/types'
 
 export interface Meta {
   key: string
@@ -13,6 +13,7 @@ class AppDB extends Dexie {
   events!: Table<TaskEvent, string>
   categories!: Table<Category, string>
   meta!: Table<Meta, string>
+  ledger!: Table<LedgerEntry, string>
 
   constructor() {
     super('pati-defteri')
@@ -24,6 +25,7 @@ class AppDB extends Dexie {
       categories: 'id',
       meta: 'key',
     })
+    this.version(2).stores({ ledger: 'id, occId, day' })
   }
 }
 

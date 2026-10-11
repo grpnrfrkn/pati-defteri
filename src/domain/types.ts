@@ -90,6 +90,38 @@ export interface TaskEvent {
   detail?: string
 }
 
+/**
+ * XP ve pati hareketi. Kimlik neye verildiğinden türetilir (`gorev:<gerçekleşme>`,
+ * `altgorev:<gerçekleşme>:<alt görev>`), bu yüzden aynı şeye ikinci kez ödül yazılamaz.
+ * Bakiye ayrı tutulmaz; bu kayıtların toplamıdır.
+ */
+export interface LedgerEntry {
+  id: string
+  occId: string | null
+  kind: 'task' | 'subtask' | 'purchase'
+  xp: number
+  pati: number
+  /** Kazanıldığı gün. */
+  day: ISODate
+  at: number
+  label: string
+}
+
+export interface Cat {
+  name: string
+  fur: string
+  eyes: string
+  pattern: string
+  createdAt: number
+}
+
+export interface Flower {
+  id: string
+  kind: string
+  note: string
+  at: number
+}
+
 export interface Category {
   id: string
   name: string

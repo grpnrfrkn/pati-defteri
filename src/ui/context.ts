@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { TaskInput, Undo } from '../db/actions'
-import type { Category, ISODate, Occurrence, Subtask, Task } from '../domain/types'
+import type { Cat, Category, Flower, ISODate, LedgerEntry, Occurrence, Subtask, Task } from '../domain/types'
 
 export interface AppData {
   /** Silinenler dahil; geçmişte görev adını gösterebilmek için. */
@@ -14,6 +14,18 @@ export interface AppData {
   dayEndTime: string
   /** Günü Toparla'sı kapatılmış günler. */
   reviewedDays: Set<ISODate>
+  ledger: LedgerEntry[]
+  /** Toplam XP ve pati bakiyesi; ledger kayıtlarının toplamı. */
+  xp: number
+  pati: number
+  cat: Cat | null
+  flowers: Flower[]
+}
+
+export interface CelebrationInfo {
+  emoji: string
+  title: string
+  text?: string | null
 }
 
 export type SheetState =
@@ -31,8 +43,10 @@ export interface AppCtx {
    * Bir veri işlemini çalıştırır. Başarılıysa mesajı (varsa geri al seçeneğiyle) gösterir;
    * kaydedilemezse bunu açıkça söyler ve false döner.
    */
-  act: (fn: () => Promise<unknown>, message?: string) => Promise<boolean>
-  notify: (message: string, undo?: Undo) => void
+  act: (fn: () => Promise<unknown>, message?: string, note?: string | null) => Promise<boolean>
+  notify: (message: string, undo?: Undo, note?: string | null) => void
+  /** Kısa, akışı kesmeyen kutlama. */
+  celebrate: (info: CelebrationInfo) => void
 }
 
 export const AppContext = createContext<AppCtx | null>(null)
