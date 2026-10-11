@@ -4,7 +4,7 @@ Kişisel görevleri yönetmek ve görev tamamladıkça sanal bir kediyi büyütm
 
 Site: https://grpnrfrkn.github.io/pati-defteri/
 
-Durum: Aşama 1 (görev yönetiminin temeli) hazır. Sırada Aşama 2 var: takvim, arama ve filtreler, Günü Toparla.
+Durum: Aşama 1 (görev yönetiminin temeli) ve Aşama 2 (takvim, arama ve filtreler, enerji filtresi, hatırlatmalar, Günü Toparla) hazır. Sırada Aşama 3 var: sanal kedi, XP ve pati parası.
 
 ## Geliştirme
 

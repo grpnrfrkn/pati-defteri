@@ -5,7 +5,16 @@ import type { Item } from '../domain/types'
 import { useApp } from './context'
 
 /** Bir işin planını değiştiren seçenekler. Hiçbiri son teslim tarihine dokunmaz. */
-export function MoveActions({ item, onDone, canLeave }: { item: Item; onDone?: () => void; canLeave?: boolean }) {
+export function MoveActions({
+  item,
+  onDone,
+  leaveLabel,
+}: {
+  item: Item
+  onDone?: () => void
+  /** Verilirse "hiçbir şey yapma" seçeneği bu adla gösterilir. */
+  leaveLabel?: string
+}) {
   const { today, act } = useApp()
   const [picking, setPicking] = useState(false)
   const tomorrow = addDays(today, 1)
@@ -37,9 +46,9 @@ export function MoveActions({ item, onDone, canLeave }: { item: Item; onDone?: (
           Tarihsiz listeye al
         </button>
       )}
-      {canLeave && (
+      {leaveLabel && (
         <button className="btn ghost" onClick={onDone}>
-          Olduğu gibi bırak
+          {leaveLabel}
         </button>
       )}
       {picking && (

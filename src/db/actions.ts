@@ -26,6 +26,8 @@ export interface TaskInput {
   priority?: Priority
   estimateMin?: number | null
   difficulty?: Difficulty | null
+  reminderEnabled?: boolean
+  reminderTime?: string | null
 }
 
 export interface SubtaskInput {
@@ -47,6 +49,8 @@ export async function createTask(input: TaskInput, subtasks: SubtaskInput[] = []
     priority: input.priority ?? 'normal',
     estimateMin: input.estimateMin ?? null,
     difficulty: input.difficulty ?? null,
+    reminderEnabled: input.reminderEnabled ?? false,
+    reminderTime: input.reminderTime ?? null,
     sortOrder: nextOrder(),
     suggestionDismissed: false,
     createdAt: t,
@@ -91,6 +95,8 @@ export async function updateTask(id: string, input: TaskInput, subtasks: Subtask
       priority: input.priority ?? 'normal',
       estimateMin: input.estimateMin ?? null,
       difficulty: input.difficulty ?? null,
+      reminderEnabled: input.reminderEnabled ?? false,
+      reminderTime: input.reminderTime ?? null,
       // Son teslim tarihi değiştiyse öneri yeniden gösterilebilir.
       suggestionDismissed: prev.suggestionDismissed && prev.dueDate === (input.dueDate ?? null),
       updatedAt: now(),

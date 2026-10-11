@@ -39,6 +39,17 @@ export function daysInMonth(d: ISODate): number {
   return new Date(Date.UTC(y, m, 0)).getUTCDate()
 }
 
+export const startOfWeek = (d: ISODate): ISODate => addDays(d, 1 - isoWeekday(d))
+export const startOfMonth = (d: ISODate): ISODate => `${d.slice(0, 8)}01`
+/** n ay sonrasının ilk günü. */
+export function addMonths(d: ISODate, n: number): ISODate {
+  const [y, m] = d.split('-').map(Number)
+  return fromUTC(Date.UTC(y, m - 1 + n, 1))
+}
+/** Yerel saat, "SS:DD". */
+export const nowHM = (now = new Date()): string => `${pad(now.getHours())}:${pad(now.getMinutes())}`
+export const minutesOf = (hm: string): number => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3, 5))
+
 /** "8 Ekim" */
 export const formatDay = (d: ISODate): string => `${dayOfMonth(d)} ${MONTHS[monthOf(d) - 1]}`
 /** "8 Ekim Perşembe" */

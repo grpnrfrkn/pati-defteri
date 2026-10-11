@@ -27,6 +27,9 @@ export interface Task {
   estimateMin: number | null
   /** null = belirtilmemiş (kolay sayılmaz). */
   difficulty: Difficulty | null
+  /** Hatırlatma kapalı olsa da planlama aynı kalır. Eski kayıtlarda alan olmayabilir. */
+  reminderEnabled?: boolean
+  reminderTime?: string | null
   sortOrder: number
   suggestionDismissed: boolean
   createdAt: number

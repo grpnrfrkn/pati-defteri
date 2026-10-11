@@ -1,12 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useRef, useState } from 'react'
-import { addCategory, deleteCategory, exportBackup, importBackup, renameCategory } from '../db/actions'
+import { addCategory, deleteCategory, exportBackup, importBackup, renameCategory, setMeta } from '../db/actions'
 import { db } from '../db/db'
 import type { Category } from '../domain/types'
+import { CalendarView } from './CalendarView'
 import { useApp } from './context'
 import { describeEvent, eventOccurrenceLabel, formatTimestamp } from './labels'
 
-type View = 'menu' | 'history' | 'categories' | 'backup'
+type View = 'menu' | 'calendar' | 'history' | 'categories' | 'settings' | 'backup'
 
 function History() {
   const { data } = useApp()
@@ -190,14 +191,38 @@ function Backup() {
   )
 }
 
+function Settings() {
+  const { data, act } = useApp()
+  return (
+    <div className="stack">
+      <label className="field">
+        <span>Gün sonu saati</span>
+        <input
+          type="time"
+          className="input"
+          value={data.dayEndTime}
+          onChange={(e) => e.target.value && act(() => setMeta('dayEndTime', e.target.value), 'Kaydedildi')}
+        />
+      </label>
+      <p className="hint">
+        Bu saatte uygulama açıksa Günü Toparla kendiliğinden gelir. Kapalıysa bir sonraki açılışta sunulur; istediğin
+        zaman “Daha sonra” diyebilirsin.
+      </p>
+    </div>
+  )
+}
+
 const TITLES: Record<View, string> = {
   menu: 'Diğer',
+  calendar: 'Takvim',
+  settings: 'Ayarlar',
   history: 'Görev geçmişi',
   categories: 'Kategoriler',
   backup: 'Yedekleme',
 }
 
 export function MorePage() {
+  const { today, open } = useApp()
   const [view, setView] = useState<View>('menu')
   return (
     <div className="page">
@@ -212,6 +237,12 @@ export function MorePage() {
       {view === 'menu' && (
         <ul className="menu card">
           <li>
+            <button onClick={() => setView('calendar')}>Takvim</button>
+          </li>
+          <li>
+            <button onClick={() => open({ type: 'review', date: today })}>Günü Toparla</button>
+          </li>
+          <li>
             <button onClick={() => setView('history')}>Görev geçmişi</button>
           </li>
           <li>
@@ -221,10 +252,12 @@ export function MorePage() {
             <button onClick={() => setView('backup')}>Yedekleme</button>
           </li>
           <li>
-            <span className="soon">Takvim · yakında</span>
+            <button onClick={() => setView('settings')}>Ayarlar</button>
           </li>
         </ul>
       )}
+      {view === 'calendar' && <CalendarView />}
+      {view === 'settings' && <Settings />}
       {view === 'history' && <History />}
       {view === 'categories' && <Categories />}
       {view === 'backup' && <Backup />}

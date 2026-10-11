@@ -59,5 +59,12 @@ Gereksinimde açık olmayan, davranışı etkileyen kararlar:
 1. **Bugün ekranında bölümleme** (onaylandı): yüksek öncelikli görevler (tekrarlansa bile) “Öncelikli işler”de; kalan tekrarlı görevler “Rutinler”de; diğer her şey “Diğer işler”de.
 2. **Alt görevler bitince** (onaylandı): ana görev kendiliğinden tamamlanmaz; “Hepsi bitti, görevi tamamlayalım mı?” diye sorulur.
 3. **Yedekleme** (onaylandı): Diğer > Yedekleme altında elle “yedek al / yedekten yükle”.
-4. **Geçmişten kalanlarda tekrarlı görevler** (öneri, onay bekliyor): yalnızca en son kaçan tekrar gösterilir ve sıradaki tekrarın günü gelince listeden düşer. Günlük rutinler bu yüzden hiç birikmez; kaçan haftalık bir iş ise bir sonraki haftaya kadar görünür. Amaç §2'deki “birikme ana ekranı bunaltmamalı” ilkesi.
-5. **Bugün tamamlanan başka günün işi** (öneri, onay bekliyor): geçmişten kalan ya da tarihsiz bir iş bugün tamamlanırsa Bugün ekranında tamamlanmış olarak görünür ve günün sayacına girer.
+4. **Geçmişten kalanlarda tekrarlı görevler** (onaylandı): yalnızca en son kaçan tekrar gösterilir ve sıradaki tekrarın günü gelince listeden düşer. Günlük rutinler bu yüzden hiç birikmez; kaçan haftalık bir iş ise bir sonraki haftaya kadar görünür. Amaç §2'deki “birikme ana ekranı bunaltmamalı” ilkesi.
+5. **Bugün tamamlanan başka günün işi** (onaylandı): geçmişten kalan ya da tarihsiz bir iş bugün tamamlanırsa Bugün ekranında tamamlanmış olarak görünür ve günün sayacına girer.
+
+## Aşama 2 notları
+
+* **Süre ve zorluk filtresi:** süresi ya da zorluğu belirtilmemiş görevler ölçüte "uyuyor" sayılmaz, sessizce de elenmez. Varsayılan olarak gizlenir, kaç tanesinin bu yüzden gizli olduğu yazılır ve tek dokunuşla gösterilebilir. Enerji filtresi yalnızca görünümü daraltır; hiçbir görevi değiştirmez.
+* **Hatırlatmalar:** uygulama açıkken, saati gelen ve o gün bekleyen işler için ekranda gösterilir. Saati bir saatten fazla geçmiş hatırlatma gösterilmez. Kapalıyken bildirim ertelenenler arasındadır.
+* **Günü Toparla:** gün sonu saati (varsayılan 21:00) Diğer > Ayarlar'dan değişir. Saat geldiğinde uygulama açıksa kendiliğinden açılır; "Daha sonra" denirse bir saat boyunca kendiliğinden gelmez. Bir gün kapatılmadan geçtiyse ve bekleyen iş kaldıysa ertesi açılışta o gün için sunulur. Özetteki XP ve pati parası Aşama 3'te eklenecek.
+* **Takvim:** günler `itemsForDate` ile hesaplanır; tarihsiz görevler takvimde görünmez.

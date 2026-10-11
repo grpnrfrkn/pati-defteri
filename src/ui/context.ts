@@ -10,6 +10,10 @@ export interface AppData {
   occs: Occurrence[]
   categories: Category[]
   onboarded: boolean
+  /** Gün sonu saati, "SS:DD". */
+  dayEndTime: string
+  /** Günü Toparla'sı kapatılmış günler. */
+  reviewedDays: Set<ISODate>
 }
 
 export type SheetState =
@@ -17,6 +21,7 @@ export type SheetState =
   | { type: 'quick' }
   | { type: 'form'; taskId?: string; defaults?: Partial<TaskInput> }
   | { type: 'detail'; taskId: string; originalDate: string }
+  | { type: 'review'; date: ISODate }
 
 export interface AppCtx {
   data: AppData

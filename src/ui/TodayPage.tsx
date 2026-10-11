@@ -19,8 +19,11 @@ import { useState } from 'react'
 import { dismissSuggestion, reorderTasks, setPriority } from '../db/actions'
 import { addDays, formatDay, formatFrom, formatLong } from '../domain/dates'
 import { itemsForDate, overdueItems, sectionOf } from '../domain/derive'
-import type { Item, Section } from '../domain/types'
+import { applyEffort, effortActive, NO_EFFORT, type EffortFilter } from '../domain/filter'
+import type { Item, Priority, Section } from '../domain/types'
 import { useApp } from './context'
+import { EffortControls, useSessionState } from './EffortControls'
+import { PRIORITY } from './labels'
 import { MoveActions } from './MoveActions'
 import { TaskRow } from './TaskRow'
 
@@ -94,23 +97,61 @@ function SectionList({ items }: { items: Item[] }) {
   )
 }
 
-function Overdue({ items }: { items: Item[] }) {
+function Overdue({ items: all }: { items: Item[] }) {
+  const { data, today } = useApp()
   const [open, setOpen] = useState(false)
   const [choosing, setChoosing] = useState<string | null>(null)
-  if (items.length === 0) return null
+  const [category, setCategory] = useState('')
+  const [priority, setPriority] = useState('')
+  const [age, setAge] = useState('')
+  if (all.length === 0) return null
+  const weekAgo = addDays(today, -7)
+  const items = all.filter(
+    (i) =>
+      (!category || (category === 'none' ? !i.task.categoryId : i.task.categoryId === category)) &&
+      (!priority || i.task.priority === priority) &&
+      (!age || !i.date || (age === 'week' ? i.date >= weekAgo : i.date < weekAgo)),
+  )
   return (
     <section className="overdue">
       <button className="overdue-toggle" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-        <span>Geçmişten kalan {items.length} görev</span>
+        <span>Geçmişten kalan {all.length} görev</span>
         <span aria-hidden>{open ? '▴' : '▾'}</span>
       </button>
+      {open && all.length > 4 && (
+        <div className="inline-filters">
+          <select className="input" aria-label="Tarihe göre" value={age} onChange={(e) => setAge(e.target.value)}>
+            <option value="">Tüm tarihler</option>
+            <option value="week">Son 7 gün</option>
+            <option value="older">Daha eski</option>
+          </select>
+          <select className="input" aria-label="Kategoriye göre" value={category} onChange={(e) => setCategory(e.target.value)}>
+            <option value="">Tüm kategoriler</option>
+            {data.categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+            <option value="none">Kategorisiz</option>
+          </select>
+          <select className="input" aria-label="Önceliğe göre" value={priority} onChange={(e) => setPriority(e.target.value)}>
+            <option value="">Tüm öncelikler</option>
+            {(['high', 'normal', 'low'] as Priority[]).map((p) => (
+              <option key={p} value={p}>
+                {PRIORITY[p]}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+      {open && items.length === 0 && <p className="sub">Bu seçimlerle eşleşen bir görev yok.</p>}
       {open && (
         <ul className="task-list">
           {items.map((item) => (
             <li key={item.key}>
               <TaskRow item={item} extra={item.date ? `${formatFrom(item.date)} kaldı` : undefined}>
                 {choosing === item.key ? (
-                  <MoveActions item={item} canLeave onDone={() => setChoosing(null)} />
+                  <MoveActions item={item} leaveLabel="Olduğu gibi bırak" onDone={() => setChoosing(null)} />
                 ) : (
                   <button className="btn ghost row-more" onClick={() => setChoosing(item.key)}>
                     Ne yapalım?
@@ -153,13 +194,19 @@ function PrioritySuggestion({ items }: { items: Item[] }) {
 }
 
 export function TodayPage() {
-  const { data, today } = useApp()
+  const { data, today, open } = useApp()
   const [collapsed, setCollapsed] = useState<Section[]>(loadCollapsed)
+  const [effort, setEffort] = useSessionState<EffortFilter>('pati.bugun.enerji', NO_EFFORT)
+  const [energyOpen, setEnergyOpen] = useState(false)
 
   const snap = { tasks: data.tasks, occs: data.occs }
-  const items = itemsForDate(snap, today)
+  const allItems = itemsForDate(snap, today)
   const overdue = overdueItems(snap, today)
-  const doneCount = items.filter((i) => i.status === 'done').length
+  const doneCount = allItems.filter((i) => i.status === 'done').length
+  // Enerji filtresi yalnızca görünümü daraltır; hiçbir görev silinmez ya da değişmez.
+  const { shown: items, unspecified } = applyEffort(allItems, (i) => i.task, effort)
+  const filtering = effortActive(effort)
+  const hiddenCount = allItems.length - items.length
 
   const toggle = (id: Section) => {
     const next = collapsed.includes(id) ? collapsed.filter((s) => s !== id) : [...collapsed, id]
@@ -174,19 +221,52 @@ export function TodayPage() {
           <h1>Bugün</h1>
           <p className="sub">{formatLong(today)}</p>
         </div>
-        {items.length > 0 && (
-          <p className="counter" aria-label={`${items.length} işten ${doneCount} tanesi tamamlandı`}>
-            <strong>{doneCount}</strong> / {items.length} tamamlandı
+        {allItems.length > 0 && (
+          <p className="counter" aria-label={`${allItems.length} işten ${doneCount} tanesi tamamlandı`}>
+            <strong>{doneCount}</strong> / {allItems.length} tamamlandı
           </p>
         )}
       </header>
 
-      <PrioritySuggestion items={[...items, ...overdue]} />
+      {allItems.length > 0 && (
+        <div className="row-actions">
+          <button
+            className={`chip${filtering ? ' on' : ''}`}
+            aria-expanded={energyOpen}
+            onClick={() => setEnergyOpen((v) => !v)}
+          >
+            Enerjime göre göster
+          </button>
+          {filtering && (
+            <button className="link" onClick={() => setEffort(NO_EFFORT)}>
+              Hepsini göster
+            </button>
+          )}
+        </div>
+      )}
+      {energyOpen && (
+        <section className="card panel">
+          <EffortControls value={effort} onChange={setEffort} hiddenUnspecified={unspecified} />
+        </section>
+      )}
+      {filtering && hiddenCount > 0 && (
+        <p className="sub filter-note">
+          Seçimine uymayan {hiddenCount} görev şimdilik gizli
+          {unspecified > 0 && ` (${unspecified} tanesinin süresi ya da zorluğu belirtilmemiş)`}. Hepsi yerinde duruyor.
+        </p>
+      )}
 
-      {items.length === 0 && (
+      <PrioritySuggestion items={[...allItems, ...overdue]} />
+
+      {allItems.length === 0 && (
         <div className="empty">
           <p>Bugün için planlanmış bir şey yok 🌷</p>
           <p className="sub">Sağ alttaki + ile minik bir adım ekleyebilirsin.</p>
+        </div>
+      )}
+      {allItems.length > 0 && items.length === 0 && (
+        <div className="empty">
+          <p>Bu seçimlere uyan bir görev yok 🌷</p>
         </div>
       )}
 
@@ -209,6 +289,10 @@ export function TodayPage() {
       })}
 
       <Overdue items={overdue} />
+
+      <button className="btn ghost review-link" onClick={() => open({ type: 'review', date: today })}>
+        Günü toparla 🌙
+      </button>
     </div>
   )
 }

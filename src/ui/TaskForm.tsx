@@ -45,6 +45,8 @@ export function TaskForm({
     taskId ? subtasksOf(data, taskId).map((s) => ({ id: s.id, title: s.title })) : [],
   )
   const [newSub, setNewSub] = useState('')
+  const [reminderOn, setReminderOn] = useState(init.reminderEnabled ?? false)
+  const [reminderTime, setReminderTime] = useState(init.reminderTime ?? '09:00')
 
   const recurring = recType !== 'none'
   const valid = title.trim() !== '' && !(recType === 'weekly' && days.length === 0)
@@ -85,6 +87,8 @@ export function TaskForm({
       priority,
       estimateMin: estimate,
       difficulty,
+      reminderEnabled: reminderOn,
+      reminderTime: reminderOn ? reminderTime : null,
     }
     const allSubs = newSub.trim() ? [...subs, { title: newSub.trim() }] : subs
     const ok = await act(
@@ -329,6 +333,35 @@ export function TaskForm({
               Ekle
             </button>
           </div>
+        </div>
+
+        <div className="field">
+          <label className="check-field">
+            <input
+              type="checkbox"
+              checked={reminderOn}
+              onChange={(e) => {
+                setReminderOn(e.target.checked)
+                // İzin, ilk hatırlatma açıldığında istenir.
+                if (e.target.checked && 'Notification' in window && Notification.permission === 'default') {
+                  Notification.requestPermission().catch(() => {})
+                }
+              }}
+            />
+            Hatırlat
+          </label>
+          {reminderOn && (
+            <>
+              <input
+                type="time"
+                className="input"
+                aria-label="Hatırlatma saati"
+                value={reminderTime}
+                onChange={(e) => setReminderTime(e.target.value)}
+              />
+              <p className="hint">Hatırlatmalar şimdilik yalnızca uygulama açıkken gösterilir.</p>
+            </>
+          )}
         </div>
 
         <label className="check-field">

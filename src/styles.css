@@ -874,3 +874,127 @@ select.input.small {
     bottom: 32px;
   }
 }
+
+/* ——— Aşama 2: arama, filtreler, takvim, Günü Toparla ——— */
+
+.link {
+  color: var(--lilac-deep);
+  font-weight: 700;
+  text-decoration: underline;
+  min-height: 32px;
+}
+
+.panel {
+  padding: 16px;
+}
+
+.search-row {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-note {
+  margin-top: -6px;
+}
+
+.inline-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.review-link {
+  justify-self: center;
+  align-self: center;
+}
+
+.reminders {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cal-bar,
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cal {
+  padding: 10px 8px;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-weekday {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  padding-bottom: 6px;
+}
+
+.cal-day {
+  min-height: 52px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1.5px solid transparent;
+}
+
+.cal-day.outside {
+  opacity: 0.4;
+}
+
+.cal-day.today .cal-num {
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: var(--lilac);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 3px;
+}
+
+.cal-day.selected {
+  background: var(--lilac-soft);
+  border-color: var(--lilac-deep);
+}
+
+.cal-count {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.cal-count.all-done {
+  color: var(--lilac-deep);
+  font-weight: 700;
+}
+
+.review-lead {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.done-list {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.review-item {
+  padding: 4px 12px 10px;
+  display: grid;
+  gap: 4px;
+  justify-items: start;
+}
+
+.review-item .move-actions {
+  padding: 0;
+}
