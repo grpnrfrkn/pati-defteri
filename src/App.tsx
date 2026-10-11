@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { seedDefaults, UserError, type Undo } from './db/actions'
 import { db } from './db/db'
 import { addDays, nowHM, todayISO } from './domain/dates'
@@ -13,6 +13,7 @@ import { maybeGiveFlower } from './ui/complete'
 import { pickNote } from './ui/love'
 import { AppContext, type AppCtx, type AppData, type CelebrationInfo, type SheetState } from './ui/context'
 import { DayReview } from './ui/DayReview'
+import { CatIcon, ListIcon, MoreIcon, ShopIcon, SunIcon } from './ui/Icons'
 import { MorePage } from './ui/MorePage'
 import { Onboarding } from './ui/Onboarding'
 import { QuickAdd } from './ui/QuickAdd'
@@ -24,12 +25,12 @@ import { TodayPage } from './ui/TodayPage'
 
 type Tab = 'bugun' | 'gorevler' | 'kedim' | 'magaza' | 'diger'
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'bugun', label: 'Bugün', icon: '☀' },
-  { id: 'gorevler', label: 'Görevler', icon: '☰' },
-  { id: 'kedim', label: 'Kedim', icon: '🐾' },
-  { id: 'magaza', label: 'Mağaza', icon: '✿' },
-  { id: 'diger', label: 'Diğer', icon: '⋯' },
+const TABS: { id: Tab; label: string; icon: ReactNode }[] = [
+  { id: 'bugun', label: 'Bugün', icon: <SunIcon /> },
+  { id: 'gorevler', label: 'Görevler', icon: <ListIcon /> },
+  { id: 'kedim', label: 'Kedim', icon: <CatIcon /> },
+  { id: 'magaza', label: 'Mağaza', icon: <ShopIcon /> },
+  { id: 'diger', label: 'Diğer', icon: <MoreIcon /> },
 ]
 
 const DEFAULT_DAY_END = '21:00'
@@ -232,9 +233,7 @@ export function App() {
                 aria-current={tab === t.id ? 'page' : undefined}
                 onClick={() => setTab(t.id)}
               >
-                <span className="nav-icon" aria-hidden>
-                  {t.icon}
-                </span>
+                <span className="nav-icon">{t.icon}</span>
                 {t.label}
               </button>
             ))}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createTask, setMeta, type TaskInput } from '../db/actions'
 import { describeRecurrence } from '../domain/recurrence'
 import { useApp } from './context'
+import { InstallHint } from './InstallHint'
 import { formatMinutes } from './labels'
 
 interface Sample extends TaskInput {
@@ -44,6 +45,7 @@ export function Onboarding() {
           Burası senin defterin. İşlerini küçük adımlara bölüp bugüne, yarına ya da “bir ara”ya yazabilirsin. Yapamadığın
           bir şey olursa sorun değil; başka bir güne almak tek dokunuş.
         </p>
+        <InstallHint dismissable={false} />
         <h2>İstersen birkaç örnekle başla</h2>
         <p className="sub">Seçtiklerin bugüne eklenir; sonra hepsini değiştirebilir ya da silebilirsin.</p>
         <ul className="plain-list">

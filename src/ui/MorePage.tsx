@@ -7,7 +7,7 @@ import { CalendarView } from './CalendarView'
 import { useApp } from './context'
 import { describeEvent, eventOccurrenceLabel, formatTimestamp } from './labels'
 
-type View = 'menu' | 'calendar' | 'history' | 'categories' | 'settings' | 'backup'
+type View = 'menu' | 'calendar' | 'history' | 'ledger' | 'categories' | 'settings' | 'backup'
 
 function History() {
   const { data } = useApp()
@@ -191,6 +191,43 @@ function Backup() {
   )
 }
 
+const LEDGER_KIND = { task: 'Görev', subtask: 'Alt görev', purchase: 'Satın alma' } as const
+
+/** XP ve pati parasının nereden gelip nereye gittiği. */
+function Ledger() {
+  const { data } = useApp()
+  const rows = [...data.ledger].sort((a, b) => b.at - a.at).slice(0, 300)
+  if (rows.length === 0) {
+    return (
+      <div className="empty">
+        <p>Henüz bir hareket yok 🌷</p>
+        <p className="sub">Görev tamamladıkça burada birikir.</p>
+      </div>
+    )
+  }
+  return (
+    <div className="stack">
+      <p className="sub">
+        Toplam {data.xp} XP · bakiye 🐾 {Math.max(0, data.pati)} pati
+      </p>
+      <ul className="history card">
+        {rows.map((e) => (
+          <li key={e.id}>
+            <span>
+              <strong>{e.label}</strong>
+              <br />
+              {LEDGER_KIND[e.kind]}
+              {e.xp > 0 && ` · +${e.xp} XP`} · {e.pati > 0 ? '+' : '−'}
+              {Math.abs(e.pati)} pati
+            </span>
+            <time>{formatTimestamp(e.at)}</time>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function Settings() {
   const { data, act } = useApp()
   return (
@@ -216,6 +253,7 @@ const TITLES: Record<View, string> = {
   menu: 'Diğer',
   calendar: 'Takvim',
   settings: 'Ayarlar',
+  ledger: 'Pati hareketleri',
   history: 'Görev geçmişi',
   categories: 'Kategoriler',
   backup: 'Yedekleme',
@@ -246,6 +284,9 @@ export function MorePage() {
             <button onClick={() => setView('history')}>Görev geçmişi</button>
           </li>
           <li>
+            <button onClick={() => setView('ledger')}>Pati hareketleri</button>
+          </li>
+          <li>
             <button onClick={() => setView('categories')}>Kategoriler</button>
           </li>
           <li>
@@ -259,6 +300,7 @@ export function MorePage() {
       {view === 'calendar' && <CalendarView />}
       {view === 'settings' && <Settings />}
       {view === 'history' && <History />}
+      {view === 'ledger' && <Ledger />}
       {view === 'categories' && <Categories />}
       {view === 'backup' && <Backup />}
     </div>

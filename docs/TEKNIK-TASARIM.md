@@ -86,4 +86,11 @@ Gereksinimde açık olmayan, davranışı etkileyen kararlar:
 * **Oda:** `meta` içinde tek kayıt (duvar kâğıdı, halı, takılı aksesuarlar, yerleştirilen eşyalar). Oda 4:3 oranında çizilir; eşya konumları ve boyutları odaya orandır. Yüklenirken sahip olunmayan ya da bilinmeyen eşyalar atılır ve konumlar yeniden sınırlanır.
 * **Yerleştirme:** eşya alt-orta noktasından konumlanır; zemin eşyaları zemin bandında, duvar eşyaları duvar bandında kalır (`clampPosition`). Derinlik sırası dikey konumdan gelir: aşağıdaki eşya öndedir. Halı ve duvar kâğıdı serbest yerleştirilmez, seçilir.
 * **Çizim:** mobilya, oyuncak ve dekorasyonlar çıkartma görünümünde emoji olarak çizilir (cihazın emoji yazı tipiyle). Aksesuarlar kedinin SVG'sine eklenir. Özel çizimler Aşama 5'te ele alınabilir.
-* **Bilinen eksik:** eşyalar yalnızca sürükleyerek taşınır; klavyeyle taşıma yok.
+* Eşyalar sürükleyerek ya da odaklanıp ok tuşlarıyla taşınır.
+
+## Aşama 5 notları
+
+* **Görsel dil:** `src/styles.css` sonundaki "Aşama 5" bölümü. Başlıklarda washi bant ve çiçek çıkartması, not kâğıtlarında bant, hafif kâğıt dokusu, el yazısı başlık yazı tipi (cihazda yüklü olanlardan: iPhone'da Noteworthy). Dış yazı tipi ya da görsel dosyası yüklenmez; süslemeler CSS ve gömülü SVG'dir.
+* **Okunabilirlik önce gelir:** görev satırları ve formlar düz sistem yazı tipinde kalır; öncelik ve durum renge ek olarak metin ve simgeyle gösterilir; dokunma alanları en az 44 pikseldir; hareket azaltma tercihi açıksa animasyonlar kapanır.
+* **iPhone kurulumu:** ana ekrana eklenen uygulamanın verisi Safari sekmesindekinden ayrıdır. Bu yüzden Safari sekmesinde açıldığında ilk açılış ekranında ve Bugün'de "önce ana ekranına ekle" uyarısı gösterilir.
+* **Pati hareketleri:** Diğer menüsünde XP ve pati kayıtlarının listesi.

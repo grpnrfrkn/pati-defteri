@@ -1,8 +1,11 @@
-import { useRef, useState, type PointerEvent, type ReactNode, type RefObject } from 'react'
+import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode, type RefObject } from 'react'
 import { clampPosition, findItem, FLOOR_TOP, type ShopItem } from '../domain/shop'
 import type { RoomState } from '../domain/types'
 
 type Placed = RoomState['placed'][number]
+
+/** Ok tuşuyla bir adımda taşınan mesafe (odaya oranla). */
+const KEY_STEP = 0.03
 
 function PlacedItem({
   placed,
@@ -45,6 +48,21 @@ function PlacedItem({
     setDrag(null)
   }
 
+  // Sürükleyemeyenler için: ok tuşlarıyla küçük adımlarla taşıma.
+  const key = (e: KeyboardEvent) => {
+    const step: Record<string, [number, number]> = {
+      ArrowLeft: [-KEY_STEP, 0],
+      ArrowRight: [KEY_STEP, 0],
+      ArrowUp: [0, -KEY_STEP],
+      ArrowDown: [0, KEY_STEP],
+    }
+    const delta = editing ? step[e.key] : undefined
+    if (!delta) return
+    e.preventDefault()
+    const next = clampPosition(item.zone!, placed.x + delta[0], placed.y + delta[1])
+    if (next.x !== placed.x || next.y !== placed.y) onMove?.(item.id, next.x, next.y)
+  }
+
   return (
     <button
       className={`room-item${editing ? ' editing' : ''}${drag ? ' dragging' : ''}`}
@@ -54,7 +72,8 @@ function PlacedItem({
         fontSize: `${item.size}cqw`,
         zIndex: Math.round(pos.y * 100),
       }}
-      aria-label={editing ? `${item.name}: sürükleyerek taşı` : item.name}
+      aria-label={editing ? `${item.name}: sürükleyerek ya da ok tuşlarıyla taşı` : item.name}
+      onKeyDown={key}
       tabIndex={editing ? 0 : -1}
       onPointerDown={down}
       onPointerMove={move}

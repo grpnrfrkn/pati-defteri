@@ -4,7 +4,11 @@ Kişisel görevleri yönetmek ve görev tamamladıkça sanal bir kediyi büyütm
 
 Site: https://grpnrfrkn.github.io/pati-defteri/
 
-Durum: Aşama 1 (görev yönetiminin temeli) ve Aşama 2 (takvim, arama ve filtreler, enerji filtresi, hatırlatmalar, Günü Toparla) hazır. Aşama 3 (sanal kedi, XP ve seviyeler, pati parası, kutlamalar, sevgi notları ve çiçekler) de hazır. Aşama 4 (mağaza, envanter, seviye kilitleri, serbest oda düzenleme) de hazır. Sırada Aşama 5 var: görsel dil, animasyonlar ve kullanılabilirlik iyileştirmeleri.
+Durum: beş aşamanın hepsi tamamlandı. Hesap, cihazlar arası eşitleme ve uygulama kapalıyken bildirim bilerek ertelendi; bkz. [Sonraya bırakılanlar](docs/SONRAYA-BIRAKILANLAR.md).
+
+## iPhone'da kullanım
+
+Bağlantıyı Safari'de aç, Paylaş düğmesinden "Ana Ekrana Ekle"yi seç ve uygulamayı oradaki simgeden kullan. Veriler yalnızca o cihazda saklanır; Diğer > Yedekleme'den ara sıra yedek almak iyi olur.
 
 ## Geliştirme
 

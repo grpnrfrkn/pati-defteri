@@ -23,6 +23,7 @@ import { applyEffort, effortActive, NO_EFFORT, type EffortFilter } from '../doma
 import type { Item, Priority, Section } from '../domain/types'
 import { useApp } from './context'
 import { EffortControls, useSessionState } from './EffortControls'
+import { InstallHint } from './InstallHint'
 import { PRIORITY } from './labels'
 import { openingNote } from './love'
 import { MoveActions } from './MoveActions'
@@ -229,6 +230,8 @@ export function TodayPage() {
           </p>
         )}
       </header>
+
+      <InstallHint />
 
       {greeting && (
         <button className="love-note opening" onClick={() => setGreeting(null)} aria-label={`${greeting} (kapat)`}>
