@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { saveCat } from '../db/actions'
+import { saveCat, saveRoom } from '../db/actions'
 import { progressFor, REWARDS, STAGES, type Stage } from '../domain/rewards'
+import { findItem } from '../domain/shop'
 import type { Cat } from '../domain/types'
 import { CatSvg, EYES, FURS, PATTERNS, type CatAction } from './CatSvg'
 import { useApp } from './context'
 import { formatTimestamp } from './labels'
 import { maybeNote } from './love'
+import { Room } from './Room'
+import { RoomEditor } from './RoomEditor'
 import { meow, purr, setSoundEnabled, soundEnabled } from './sound'
 
 const NEW_CAT: Cat = { name: '', fur: 'cream', eyes: 'green', pattern: 'plain', createdAt: 0 }
@@ -114,8 +117,9 @@ const ACTIONS: { id: CatAction; label: string; from: Stage; ms: number }[] = [
 const stageIndex = (stage: Stage) => STAGES.findIndex((s) => s.id === stage)
 
 export function CatPage() {
-  const { data } = useApp()
+  const { data, act } = useApp()
   const [editing, setEditing] = useState(false)
+  const [decorating, setDecorating] = useState(false)
   const [action, setAction] = useState<CatAction>('idle')
   const [sound, setSound] = useState(soundEnabled)
   const [note] = useState(() => maybeNote('genel', 0.35))
@@ -161,6 +165,9 @@ export function CatPage() {
   }
 
   const nextStage = STAGES[stageIndex(progress.stage) + 1]
+  // Oynarken, odadaki ya da envanterdeki oyuncaklardan biri kullanılır.
+  const toys = [...data.owned].map(findItem).filter((i) => i?.category === 'toy')
+  const toy = toys[data.xp % Math.max(1, toys.length)]?.emoji
 
   return (
     <div className="page">
@@ -176,83 +183,110 @@ export function CatPage() {
         </p>
       </header>
 
-      <button className="cat-scene tappable" aria-label={`${cat.name} adlı kediyi sev`} onClick={() => run(ACTIONS[0])}>
-        <CatSvg cat={cat} stage={progress.stage} action={action} />
-      </button>
-
-      <div className="chips" role="group" aria-label="Kediyle etkileşim">
-        {ACTIONS.map((a) => {
-          const locked = stageIndex(progress.stage) < stageIndex(a.from)
-          return (
-            <button key={a.id} className={`chip${action === a.id ? ' on' : ''}`} disabled={locked} onClick={() => run(a)}>
-              {a.label}
-              {locked && ` · ${STAGES[stageIndex(a.from)].label} olunca`}
-            </button>
+      <Room
+        room={data.room}
+        editing={decorating}
+        onMove={(itemId, x, y) =>
+          act(() =>
+            saveRoom({ ...data.room, placed: data.room.placed.map((p) => (p.itemId === itemId ? { itemId, x, y } : p)) }),
           )
-        })}
-      </div>
-
-      <section className="card panel stack">
-        <div className="progress" aria-label={`Seviye ${progress.level}: ${progress.intoLevel}/${progress.needed} XP`}>
-          <span className="progress-bar wide">
-            <span style={{ width: `${(progress.intoLevel / progress.needed) * 100}%` }} />
-          </span>
-          <span className="progress-text">
-            {progress.intoLevel}/{progress.needed} XP
-          </span>
-        </div>
-        <p className="sub">
-          Toplam {data.xp} XP.
-          {nextStage && ` ${cat.name}, seviye ${nextStage.fromLevel} olunca ${nextStage.label.toLocaleLowerCase('tr')} bir kedi olacak.`}
-        </p>
-        <details>
-          <summary>Ödüller nasıl hesaplanıyor?</summary>
-          <p className="sub">
-            Her tamamlanan görev XP ve pati kazandırır: süre girilmemiş bir görev {REWARDS.baseXp} XP, 5 dakikalık bir
-            görev {REWARDS.xpByMinutes[0][1]} XP, bir saatlik bir görev {REWARDS.xpByMinutes[4][1]} XP. Orta zorluk
-            XP’yi {REWARDS.difficulty.medium} ile, zor {REWARDS.difficulty.hard} ile çarpar. Pati, XP’nin yarısı kadardır
-            (en az {REWARDS.minPati}). Her alt görev ayrıca {REWARDS.subtask.xp} XP ve {REWARDS.subtask.pati} pati verir.
-            Atlamak ya da ertelemek hiçbir şey eksiltmez.
-          </p>
-        </details>
-      </section>
-
-      {note && <p className="love-note">💌 {note}</p>}
-
-      {data.flowers.length > 0 && (
-        <section className="stack">
-          <h2>Çiçeklerim · {data.flowers.length}</h2>
-          <ul className="flowers">
-            {[...data.flowers].reverse().map((f) => (
-              <li key={f.id} className="card">
-                <span className="flower" aria-hidden>
-                  {f.kind}
-                </span>
-                <span>
-                  {f.note}
-                  <small>{formatTimestamp(f.at)}</small>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <div className="row-actions">
-        <button className="btn ghost" onClick={() => setEditing(true)}>
-          Görünümünü düzenle
-        </button>
+        }
+      >
         <button
-          className="btn ghost"
-          aria-pressed={sound}
-          onClick={() => {
-            setSoundEnabled(!sound)
-            setSound(!sound)
-          }}
+          className="cat-button"
+          aria-label={`${cat.name} adlı kediyi sev`}
+          disabled={decorating}
+          onClick={() => run(ACTIONS[0])}
         >
-          Ses: {sound ? 'açık' : 'kapalı'}
+          <CatSvg cat={cat} stage={progress.stage} action={decorating ? 'idle' : action} wearing={data.room.wearing} toy={toy} />
         </button>
-      </div>
+      </Room>
+
+      {decorating ? (
+        <RoomEditor onDone={() => setDecorating(false)} />
+      ) : (
+        <>
+          <div className="row-actions">
+            <button className="btn soft" onClick={() => setDecorating(true)}>
+              Odayı düzenle
+            </button>
+          </div>
+
+          <div className="chips" role="group" aria-label="Kediyle etkileşim">
+            {ACTIONS.map((a) => {
+              const locked = stageIndex(progress.stage) < stageIndex(a.from)
+              return (
+                <button key={a.id} className={`chip${action === a.id ? ' on' : ''}`} disabled={locked} onClick={() => run(a)}>
+                  {a.label}
+                  {locked && ` · ${STAGES[stageIndex(a.from)].label} olunca`}
+                </button>
+              )
+            })}
+          </div>
+
+          <section className="card panel stack">
+            <div className="progress" aria-label={`Seviye ${progress.level}: ${progress.intoLevel}/${progress.needed} XP`}>
+              <span className="progress-bar wide">
+                <span style={{ width: `${(progress.intoLevel / progress.needed) * 100}%` }} />
+              </span>
+              <span className="progress-text">
+                {progress.intoLevel}/{progress.needed} XP
+              </span>
+            </div>
+            <p className="sub">
+              Toplam {data.xp} XP.
+              {nextStage && ` ${cat.name}, seviye ${nextStage.fromLevel} olunca ${nextStage.label.toLocaleLowerCase('tr')} bir kedi olacak.`}
+            </p>
+            <details>
+              <summary>Ödüller nasıl hesaplanıyor?</summary>
+              <p className="sub">
+                Her tamamlanan görev XP ve pati kazandırır: süre girilmemiş bir görev {REWARDS.baseXp} XP, 5 dakikalık bir
+                görev {REWARDS.xpByMinutes[0][1]} XP, bir saatlik bir görev {REWARDS.xpByMinutes[4][1]} XP. Orta zorluk
+                XP’yi {REWARDS.difficulty.medium} ile, zor {REWARDS.difficulty.hard} ile çarpar. Pati, XP’nin yarısı kadardır
+                (en az {REWARDS.minPati}). Her alt görev ayrıca {REWARDS.subtask.xp} XP ve {REWARDS.subtask.pati} pati verir.
+                Atlamak ya da ertelemek hiçbir şey eksiltmez.
+              </p>
+            </details>
+          </section>
+
+          {note && <p className="love-note">💌 {note}</p>}
+
+          {data.flowers.length > 0 && (
+            <section className="stack">
+              <h2>Çiçeklerim · {data.flowers.length}</h2>
+              <ul className="flowers">
+                {[...data.flowers].reverse().map((f) => (
+                  <li key={f.id} className="card">
+                    <span className="flower" aria-hidden>
+                      {f.kind}
+                    </span>
+                    <span>
+                      {f.note}
+                      <small>{formatTimestamp(f.at)}</small>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <div className="row-actions">
+            <button className="btn ghost" onClick={() => setEditing(true)}>
+              Görünümünü düzenle
+            </button>
+            <button
+              className="btn ghost"
+              aria-pressed={sound}
+              onClick={() => {
+                setSoundEnabled(!sound)
+                setSound(!sound)
+              }}
+            >
+              Ses: {sound ? 'açık' : 'kapalı'}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

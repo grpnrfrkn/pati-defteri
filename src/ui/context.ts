@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { TaskInput, Undo } from '../db/actions'
-import type { Cat, Category, Flower, ISODate, LedgerEntry, Occurrence, Subtask, Task } from '../domain/types'
+import type { Cat, Category, Flower, ISODate, LedgerEntry, Occurrence, RoomState, Subtask, Task } from '../domain/types'
 
 export interface AppData {
   /** Silinenler dahil; geçmişte görev adını gösterebilmek için. */
@@ -20,6 +20,9 @@ export interface AppData {
   pati: number
   cat: Cat | null
   flowers: Flower[]
+  /** Satın alınmış eşyaların kimlikleri (ücretsiz olanlar hariç). */
+  owned: Set<string>
+  room: RoomState
 }
 
 export interface CelebrationInfo {

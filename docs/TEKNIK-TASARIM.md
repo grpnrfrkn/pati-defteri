@@ -77,3 +77,13 @@ Gereksinimde açık olmayan, davranışı etkileyen kararlar:
 * **Etkileşimler:** sev, besle, oyna, uyut baştan açık; "gerin" gençken, "yuvarlan" yetişkinken açılır. Hiçbiri ödül vermez. Açlık, mutsuzluk, ihmal gibi bir durum hiç tutulmaz.
 * **Kutlamalar:** küçük görevde bildirim satırı ve işaret animasyonu; büyük görevde (alt görevli, uzun vadeli ya da 60 dk ve üzeri) ve seviye atlamada 3 saniyelik, dokunmayı engellemeyen kutlama.
 * **Sesler:** tarayıcıda üretilir; Kedim sayfasından kapatılabilir.
+
+## Aşama 4 notları
+
+* **Katalog:** `src/domain/shop.ts` içindeki `CATALOG` (33 eşya: aksesuar, mobilya, duvar kâğıdı, halı, oyuncak, dekorasyon). Fiyatlar ve seviye kilitleri oradan değişir. Denge: bir görev yaklaşık 5 pati; küçük eşyalar 15–35, büyükler 60–90, seviye kilitli özel eşyalar 100–150 pati.
+* **Satın alma ve envanter:** sahiplik ayrı bir tabloda tutulmaz; `satin:<eşya>` kimlikli ödeme kaydının kendisidir. Bu yüzden ödenmeden sahip olunamaz, ödenen eşya kaybolamaz, aynı eşya iki kez alınamaz. Bakiye ve seviye kontrolü ödemeyle aynı işlemde yapılır. Satın alma bildiriminden geri alınabilir (para iade edilir, eşya odadan kalkar).
+* **Seviye kilidi:** kilitli eşya mağazada fiyatıyla görünür; seviyeye ulaşınca satın alınabilir olur, ücretsiz verilmez.
+* **Oda:** `meta` içinde tek kayıt (duvar kâğıdı, halı, takılı aksesuarlar, yerleştirilen eşyalar). Oda 4:3 oranında çizilir; eşya konumları ve boyutları odaya orandır. Yüklenirken sahip olunmayan ya da bilinmeyen eşyalar atılır ve konumlar yeniden sınırlanır.
+* **Yerleştirme:** eşya alt-orta noktasından konumlanır; zemin eşyaları zemin bandında, duvar eşyaları duvar bandında kalır (`clampPosition`). Derinlik sırası dikey konumdan gelir: aşağıdaki eşya öndedir. Halı ve duvar kâğıdı serbest yerleştirilmez, seçilir.
+* **Çizim:** mobilya, oyuncak ve dekorasyonlar çıkartma görünümünde emoji olarak çizilir (cihazın emoji yazı tipiyle). Aksesuarlar kedinin SVG'sine eklenir. Özel çizimler Aşama 5'te ele alınabilir.
+* **Bilinen eksik:** eşyalar yalnızca sürükleyerek taşınır; klavyeyle taşıma yok.

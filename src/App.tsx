@@ -1,11 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { seedDefaults, type Undo } from './db/actions'
+import { seedDefaults, UserError, type Undo } from './db/actions'
 import { db } from './db/db'
 import { addDays, nowHM, todayISO } from './domain/dates'
 import { itemsForDate } from './domain/derive'
 import { progressFor, xpToReach } from './domain/rewards'
-import type { Cat, Flower, ISODate } from './domain/types'
+import { findItem, normalizeRoom } from './domain/shop'
+import type { Cat, Flower, ISODate, RoomState } from './domain/types'
+import { ShopPage } from './ui/ShopPage'
 import { CatPage } from './ui/CatPage'
 import { maybeGiveFlower } from './ui/complete'
 import { pickNote } from './ui/love'
@@ -58,6 +60,8 @@ function useData(): AppData | undefined {
       db.ledger.toArray(),
     ])
     const meta = new Map(metaRows.map((m) => [m.key, m.value]))
+    const owned = new Set(ledger.filter((e) => e.kind === 'purchase').map((e) => e.id.slice('satin:'.length)))
+    const owns = (id: string) => owned.has(id) || findItem(id)?.price === 0
     return {
       tasksAll,
       tasks: tasksAll.filter((t) => !t.deletedAt),
@@ -71,6 +75,8 @@ function useData(): AppData | undefined {
       pati: ledger.reduce((sum, e) => sum + e.pati, 0),
       cat: (meta.get('cat') as Cat | undefined) ?? null,
       flowers: (meta.get('flowers') as Flower[] | undefined) ?? [],
+      owned,
+      room: normalizeRoom(meta.get('room') as Partial<RoomState> | undefined, owns),
       reviewedDays: new Set(
         metaRows.filter((m) => m.key.startsWith('review:') && m.value === 'done').map((m) => m.key.slice(7)),
       ),
@@ -116,20 +122,6 @@ function dueReview(data: AppData, today: ISODate, now: string): ISODate | null {
 
 const stageAt = (level: number) => progressFor(xpToReach(level)).stage
 
-function ComingSoon({ title, text }: { title: string; text: string }) {
-  return (
-    <div className="page">
-      <header className="page-head">
-        <h1>{title}</h1>
-      </header>
-      <div className="empty">
-        <p>{text}</p>
-        <p className="sub">Bu bölüm yakında açılacak.</p>
-      </div>
-    </div>
-  )
-}
-
 export function App() {
   const data = useData()
   const { today, now } = useClock()
@@ -171,7 +163,7 @@ export function App() {
         return true
       } catch (error) {
         console.error(error)
-        notify(error instanceof Error && error.message.includes('yedeği') ? error.message : 'Kaydedilemedi. Tekrar dener misin?')
+        notify(error instanceof UserError ? error.message : 'Kaydedilemedi. Tekrar dener misin?')
         return false
       }
     },
@@ -253,7 +245,7 @@ export function App() {
             {tab === 'bugun' && <TodayPage />}
             {tab === 'gorevler' && <TasksPage />}
             {tab === 'kedim' && <CatPage />}
-            {tab === 'magaza' && <ComingSoon title="Mağaza" text="Raflar diziliyor ✿" />}
+            {tab === 'magaza' && <ShopPage />}
             {tab === 'diger' && <MorePage />}
           </main>
 

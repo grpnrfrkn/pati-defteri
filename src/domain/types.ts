@@ -115,6 +115,17 @@ export interface Cat {
   createdAt: number
 }
 
+/**
+ * Kedinin odası. Konumlar piksel değil, odanın genişlik ve yüksekliğine orandır (0–1);
+ * böylece yerleşim her ekranda aynı görünür.
+ */
+export interface RoomState {
+  wallpaper: string
+  rug: string | null
+  wearing: Partial<Record<'neck' | 'head' | 'face', string>>
+  placed: { itemId: string; x: number; y: number }[]
+}
+
 export interface Flower {
   id: string
   kind: string

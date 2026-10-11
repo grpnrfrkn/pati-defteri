@@ -1,6 +1,7 @@
 import { todayISO } from '../domain/dates'
 import { SINGLE } from '../domain/derive'
-import { REWARDS, rewardFor } from '../domain/rewards'
+import { progressFor, REWARDS, rewardFor } from '../domain/rewards'
+import { DEFAULT_ROOM, findItem, purchaseId } from '../domain/shop'
 import type {
   Cat,
   Category,
@@ -12,11 +13,15 @@ import type {
   Occurrence,
   Priority,
   Recurrence,
+  RoomState,
   Subtask,
   Task,
   TaskEvent,
 } from '../domain/types'
 import { db } from './db'
+
+/** Kullanıcıya olduğu gibi gösterilebilecek, beklenen bir engel (ör. yetersiz bakiye). */
+export class UserError extends Error {}
 
 /** Bir işlemi geri alır ve geri alındığını geçmişe yazar. */
 export type Undo = () => Promise<void>
@@ -344,6 +349,45 @@ export async function saveCat(cat: Cat): Promise<void> {
   await db.meta.put({ key: 'cat', value: cat })
 }
 
+export async function saveRoom(room: RoomState): Promise<void> {
+  await db.meta.put({ key: 'room', value: room })
+}
+
+/**
+ * Bir eşyayı pati parasıyla satın alır. Bakiye kontrolü, ödeme ve sahiplik tek işlemdir;
+ * sahiplik ödeme kaydının kendisidir, bu yüzden eşya parası ödenmeden alınamaz, ödenen
+ * eşya kaybolamaz ve çift dokunuş ikinci bir satın alma oluşturamaz.
+ */
+export async function buyItem(itemId: string): Promise<Undo> {
+  const item = findItem(itemId)
+  if (!item) throw new UserError('Bu eşya mağazada bulunamadı.')
+  const id = purchaseId(itemId)
+  await db.transaction('rw', db.ledger, async () => {
+    const rows = await db.ledger.toArray()
+    if (item.price === 0 || rows.some((r) => r.id === id)) throw new UserError('Bu eşya zaten sende.')
+    const level = progressFor(rows.reduce((sum, r) => sum + r.xp, 0)).level
+    if (item.minLevel && level < item.minLevel) throw new UserError(`Bu eşya seviye ${item.minLevel} olunca açılır.`)
+    const balance = rows.reduce((sum, r) => sum + r.pati, 0)
+    if (balance < item.price) throw new UserError(`Bunun için ${item.price - balance} pati daha gerekiyor.`)
+    await db.ledger.add({ id, occId: null, kind: 'purchase', xp: 0, pati: -item.price, day: todayISO(), at: now(), label: item.name })
+  })
+  // Geri alma: para iade edilir, eşya odadan ve kedinin üstünden kalkar.
+  return () =>
+    db.transaction('rw', db.ledger, db.meta, async () => {
+      await db.ledger.delete(id)
+      const room = ((await db.meta.get('room'))?.value as RoomState | undefined) ?? DEFAULT_ROOM
+      await db.meta.put({
+        key: 'room',
+        value: {
+          wallpaper: room.wallpaper === itemId ? DEFAULT_ROOM.wallpaper : room.wallpaper,
+          rug: room.rug === itemId ? null : room.rug,
+          wearing: Object.fromEntries(Object.entries(room.wearing ?? {}).filter(([, worn]) => worn !== itemId)),
+          placed: (room.placed ?? []).filter((placed) => placed.itemId !== itemId),
+        } satisfies RoomState,
+      })
+    })
+}
+
 export async function addFlower(kind: string, note: string): Promise<Flower> {
   const flower: Flower = { id: uid(), kind, note, at: now() }
   await db.transaction('rw', db.meta, async () => {
@@ -365,7 +409,7 @@ export async function exportBackup(): Promise<string> {
 export async function importBackup(json: string): Promise<void> {
   const parsed = JSON.parse(json)
   if (parsed?.app !== 'pati-defteri' || typeof parsed.data !== 'object') {
-    throw new Error('Bu dosya bir Pati Defteri yedeği değil')
+    throw new UserError('Bu dosya bir Pati Defteri yedeği değil.')
   }
   await db.transaction('rw', BACKUP_TABLES.map((name) => db.table(name)), async () => {
     for (const name of BACKUP_TABLES) {

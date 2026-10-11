@@ -1,5 +1,5 @@
 import type { Stage } from '../domain/rewards'
-import type { Cat } from '../domain/types'
+import type { Cat, RoomState } from '../domain/types'
 
 export const FURS: Record<string, { label: string; base: string; dark: string }> = {
   cream: { label: 'Krem', base: '#f3dfc1', dark: '#d2ae7e' },
@@ -41,10 +41,16 @@ export function CatSvg({
   cat,
   stage,
   action = 'idle',
+  wearing = {},
+  toy,
 }: {
   cat: Pick<Cat, 'fur' | 'eyes' | 'pattern' | 'name'>
   stage: Stage
   action?: CatAction
+  /** Takılı aksesuarların kimlikleri. */
+  wearing?: RoomState['wearing']
+  /** Oynarken kullanılan oyuncağın emojisi; yoksa yün yumağı çizilir. */
+  toy?: string
 }) {
   const fur = FURS[cat.fur] ?? FURS.cream
   const eye = (EYES[cat.eyes] ?? EYES.green).color
@@ -82,6 +88,19 @@ export function CatSvg({
               </g>
             )}
             {tuxedo && <ellipse cx="100" cy="162" rx="24" ry="30" fill={WHITE} />}
+            {wearing.neck === 'acc-bow' && (
+              <g fill="#e2586f" stroke="#b83a52" strokeWidth="1.5" strokeLinejoin="round">
+                <path d="M100 122 L80 112 L80 132 Z" />
+                <path d="M100 122 L120 112 L120 132 Z" />
+                <circle cx="100" cy="122" r="5" />
+              </g>
+            )}
+            {wearing.neck === 'acc-collar' && (
+              <g>
+                <path d="M70 114 q30 16 60 0" fill="none" stroke="#8f7fc0" strokeWidth="7" strokeLinecap="round" />
+                <circle cx="100" cy="127" r="6" fill="#f2c94c" stroke="#c99a1e" strokeWidth="1.5" />
+              </g>
+            )}
             <ellipse cx="80" cy="190" rx="15" ry="9" fill={tuxedo ? WHITE : fur.base} {...outline} />
             <ellipse cx="120" cy="190" rx="15" ry="9" fill={tuxedo ? WHITE : fur.base} {...outline} />
           </g>
@@ -126,6 +145,35 @@ export function CatSvg({
                 </g>
               )}
 
+              {wearing.face === 'acc-glasses' && (
+                <g fill="rgba(255,255,255,0.25)" stroke={INK} strokeWidth="2.4">
+                  <circle cx="80" cy="83" r="14" />
+                  <circle cx="120" cy="83" r="14" />
+                  <path d="M94 83 h12" fill="none" />
+                </g>
+              )}
+              {wearing.head === 'acc-beanie' && (
+                <g stroke="#6f54ad" strokeWidth="1.5">
+                  <path d="M72 50 q28 -34 56 0 z" fill="#b8a1e3" />
+                  <rect x="70" y="46" width="60" height="9" rx="4.5" fill="#efe8fb" />
+                  <circle cx="100" cy="24" r="7" fill="#efe8fb" />
+                </g>
+              )}
+              {wearing.head === 'acc-flowers' && (
+                <g stroke="#fff" strokeWidth="1.5">
+                  <circle cx="72" cy="52" r="7" fill="#f4a9bd" />
+                  <circle cx="86" cy="45" r="7" fill="#f7d774" />
+                  <circle cx="100" cy="42" r="8" fill="#c9a7f0" />
+                  <circle cx="114" cy="45" r="7" fill="#f7d774" />
+                  <circle cx="128" cy="52" r="7" fill="#f4a9bd" />
+                </g>
+              )}
+              {wearing.head === 'acc-crown' && (
+                <g>
+                  <path d="M80 50 L84 26 L93 40 L100 20 L107 40 L116 26 L120 50 Z" fill="#f2c94c" stroke="#c99a1e" strokeWidth="1.8" strokeLinejoin="round" />
+                  <circle cx="100" cy="42" r="3" fill="#e2586f" />
+                </g>
+              )}
               <ellipse cx="64" cy="98" rx="7" ry="4" fill={PINK} opacity="0.55" />
               <ellipse cx="136" cy="98" rx="7" ry="4" fill={PINK} opacity="0.55" />
               <path d="M96 94 h8 l-4 5 z" fill="#e58fa3" />
@@ -164,8 +212,16 @@ export function CatSvg({
       )}
       {action === 'play' && (
         <g className="cat-yarn">
-          <circle cx="168" cy="186" r="13" fill="#f4c9d6" stroke="#e39ab0" strokeWidth="2" />
-          <path d="M158 182 q10 -8 20 2 M158 190 q10 -6 20 -2" fill="none" stroke="#e39ab0" strokeWidth="1.5" />
+          {toy ? (
+            <text x="168" y="196" fontSize="26" textAnchor="middle" aria-hidden>
+              {toy}
+            </text>
+          ) : (
+            <>
+              <circle cx="168" cy="186" r="13" fill="#f4c9d6" stroke="#e39ab0" strokeWidth="2" />
+              <path d="M158 182 q10 -8 20 2 M158 190 q10 -6 20 -2" fill="none" stroke="#e39ab0" strokeWidth="1.5" />
+            </>
+          )}
         </g>
       )}
     </svg>
