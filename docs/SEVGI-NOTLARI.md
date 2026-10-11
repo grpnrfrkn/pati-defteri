@@ -76,4 +76,6 @@ Uygulamada parola yok (kullanıcı istemedi), bu yüzden notlar gerçek anlamda 
 * Çiçekler: uygulama açıldığında ya da bir görev tamamlandığında dörtte bir ihtimalle, ama en az iki gün arayla gelir. Gelen çiçekler notlarıyla birlikte Kedim sayfasında "Çiçeklerim" altında birikir.
 * Aynı anda tek sürpriz gösterilir: büyük kutlama, not ya da çiçek.
 
-**Durum:** şu anki notlar taslaktır (bu belgedeki ton örneklerinden türetildi). Link paylaşılmadan önce gözden geçirilip kişiselleştirilmelidir.
+**Durum:** kütüphanede benim yazdığım 50 not var (11 Ekim 2026). Çoğu `genel` altında; açılış, görev, kutlama, gün sonu ve çiçek bağlamlarına uygun olanlar ayrıca o bağlamlara da kondu. Zamanla artırılacak.
+
+Bağlama özel notlar az olduğu için uygulama her seferinde yarı yarıya bağlamın kendi notlarından, yarı yarıya `genel` notlardan seçer. "Günaydın" ile başlayan not yalnızca açılışta çıkar.

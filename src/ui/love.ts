@@ -27,23 +27,26 @@ const pick = <T>(list: T[]): T => list[Math.floor(Math.random() * list.length)]
 
 /** Bağlama uygun rastgele bir not; yakın zamanda gösterilenleri tekrar etmez. */
 export function pickNote(context: NoteContext): string | null {
-  const list = notes()[context] ?? []
+  const own = notes()[context] ?? []
+  const general = notes().genel ?? []
+  // Bağlama özel notlar azdır; sık tekrar etmesinler diye yarı yarıya genel notlardan seçilir.
+  const list = own.length > 0 && (general.length === 0 || Math.random() < 0.5) ? own : general
   if (list.length === 0) return null
   const storageKey = `pati.not.son.${context}`
-  let recent: number[] = []
+  let recent: string[] = []
   try {
     recent = JSON.parse(localStorage.getItem(storageKey) ?? '[]')
   } catch {
     // Kayıt okunamazsa yalnızca tekrar önleme çalışmaz.
   }
-  const avoid = recent.slice(-Math.min(AVOID_RECENT, list.length - 1))
-  const index = pick(list.map((_, i) => i).filter((i) => !avoid.includes(i)))
+  const fresh = list.filter((text) => !recent.includes(text))
+  const text = pick(fresh.length > 0 ? fresh : list)
   try {
-    localStorage.setItem(storageKey, JSON.stringify([...recent, index].slice(-AVOID_RECENT)))
+    localStorage.setItem(storageKey, JSON.stringify([...recent, text].slice(-AVOID_RECENT)))
   } catch {
     // yoksay
   }
-  return list[index]
+  return text
 }
 
 /** Notlar her seferinde değil, ara sıra çıkar; yoksa etkisi kaybolur. */
