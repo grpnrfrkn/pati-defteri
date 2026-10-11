@@ -51,14 +51,13 @@ Uygulama benim adıma ona çiçek verir. Çiçekleri ben anlık göndermem; uygu
 
 ## Gizlilik
 
-Repo herkese açık olduğu için notlar repoda okunabilir hâlde durmaz.
+Uygulamada parola yok (kullanıcı istemedi), bu yüzden notlar gerçek anlamda şifrelenemez. Yapılan şey göz önünden kaldırmaktır:
 
 * Notların düz metni yalnızca benim bilgisayarımda durur ve repoya gönderilmez.
-* Repoya, uygulama parolasıyla şifrelenmiş hâli konur. Uygulama, parola girildiğinde notları cihazda çözer.
-* Not eklemek veya değiştirmek için: düz metin dosyasını düzenle, yeniden şifrele, yayınla.
-* Parola değişirse notların yeniden şifrelenmesi gerekir. Parola kısa olursa şifre deneme yoluyla kırılabilir; bu kabul edilmiş bir risktir.
+* Repoya ve siteye, notların karıştırılmış (okunaksız kodlanmış) hâli konur. Repoya göz atan biri notları okuyamaz; uygulama açılınca çözer.
+* Bu bir şifre değildir: uğraşan biri uygulamanın kodundan çözme yöntemini bulup notları okuyabilir. Kabul edilmiş bir risktir.
+* Not eklemek veya değiştirmek için: düz metin dosyasını düzenle, yeniden kodla, yayınla.
 
 ## Açık kararlar
 
-* **Parola:** ne olacağı ve biçimi (ona teyit edilecek).
 * **Hitap:** notlarda ona nasıl seslenileceği (isim, lakap).

@@ -42,21 +42,22 @@ Her kayıtta `id` (rastgele, kalıcı), `updatedAt` ve `deletedAt` bulunur (sonr
 * Eşya konumları piksel değil, odanın genişlik ve yüksekliğine **oran** olarak saklanır; oda sabit en-boy oranıyla çizilir. Böylece yerleşim her ekranda aynı görünür.
 * Sürükleme sırasında konum oda sınırlarına kırpılır; zemin eşyaları zemine, duvar eşyaları duvara yerleşir.
 
-## Parola ve sevgi notları
+## Sevgi notları
 
-* Açılışta parola sorulur. Parolanın kendisi hiçbir yerde saklanmaz.
-* Sevgi notları: düz metin dosyası `.gitignore` içindedir. Bir komut, notları paroladan türetilen anahtarla (PBKDF2 + AES-GCM, tarayıcının kendi şifreleme altyapısı) şifreleyip yayınlanan dosyayı üretir. Parola doğruysa notlar çözülür; bu aynı zamanda parolanın doğrulamasıdır.
-* Görev verileri ayrıca şifrelenmez: iPhone'da uygulamanın hafızasına telefonun kendi kilidi açılmadan ulaşılamaz, uygulama içinde de parola ekranı vardır.
+* Uygulamada parola veya giriş ekranı yoktur (kullanıcı istemedi).
+* Notların düz metin dosyası `.gitignore` içindedir. Bir komut notları karıştırıp yayınlanan dosyayı üretir; uygulama açılışta çözer. Bu gizleme şifreleme değildir, yalnızca repoda okunaklı durmasını engeller.
 
 ## Cihazda saklamanın gerekleri
 
 * Uygulama ana ekrana eklenerek kullanılır; iPhone ana ekrandaki uygulamaların verisini kendiliğinden silmez. Ek olarak kalıcı saklama izni istenir.
 * Kaydedilemeyen bir işlem kaydedilmiş gibi gösterilmez (§18).
 
-## Onay bekleyen ürün kararları
+## Verilen ürün kararları
 
-Bunlar gereksinimde açık olmayan, davranışı etkileyen önerilerdir:
+Gereksinimde açık olmayan, davranışı etkileyen kararlar:
 
-1. **Bugün ekranında bölümleme:** yüksek öncelikli görevler (tekrarlansa bile) “Öncelikli işler”de; kalan tekrarlı görevler “Rutinler”de; diğer her şey “Diğer işler”de.
-2. **Alt görevler bitince:** ana görev kendiliğinden tamamlanmaz; “Hepsi bitti, görevi tamamlayalım mı?” diye sorulur.
-3. **Yedekleme:** Ayarlar'a elle “yedek al / yedekten yükle” eklenmesi (gereksinimde yok; veri kaybı riskine karşı).
+1. **Bugün ekranında bölümleme** (onaylandı): yüksek öncelikli görevler (tekrarlansa bile) “Öncelikli işler”de; kalan tekrarlı görevler “Rutinler”de; diğer her şey “Diğer işler”de.
+2. **Alt görevler bitince** (onaylandı): ana görev kendiliğinden tamamlanmaz; “Hepsi bitti, görevi tamamlayalım mı?” diye sorulur.
+3. **Yedekleme** (onaylandı): Diğer > Yedekleme altında elle “yedek al / yedekten yükle”.
+4. **Geçmişten kalanlarda tekrarlı görevler** (öneri, onay bekliyor): yalnızca en son kaçan tekrar gösterilir ve sıradaki tekrarın günü gelince listeden düşer. Günlük rutinler bu yüzden hiç birikmez; kaçan haftalık bir iş ise bir sonraki haftaya kadar görünür. Amaç §2'deki “birikme ana ekranı bunaltmamalı” ilkesi.
+5. **Bugün tamamlanan başka günün işi** (öneri, onay bekliyor): geçmişten kalan ya da tarihsiz bir iş bugün tamamlanırsa Bugün ekranında tamamlanmış olarak görünür ve günün sayacına girer.

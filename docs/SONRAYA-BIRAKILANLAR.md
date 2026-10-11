@@ -9,7 +9,7 @@
 | Telefon ve bilgisayarda aynı verilerin görünmesi | §2, §18, §19 (oda yerleşimi), kabul ölçütü 17 | Her cihaz kendi verisini tutar. Tek cihazda (iPhone) kullanılacağı varsayılır. |
 | Uygulama kapalıyken bildirim (görev hatırlatması, akşam Günü Toparla bildirimi) | §9, §10 | Hatırlatmalar yalnızca uygulama açıkken ekranda gösterilir. Gün sonu saati uygulama kapalıyken geçtiyse Günü Toparla bir sonraki açılışta sunulur. |
 | Verilerin bulutta saklanması | §18 | Veriler cihazın tarayıcı hafızasında durur. |
-| Kullanıcı hesabı (hesap oluşturma / giriş) | §3 (Ayarlar ve hesap), §17 adım 1, §18 | Hesap yok. Uygulama açılışında tek bir parola sorulur. |
+| Kullanıcı hesabı (hesap oluşturma / giriş) | §3 (Ayarlar ve hesap), §17 adım 1, §18 | Hesap ve giriş ekranı yok; parola da yok (kullanıcı istemedi). Uygulama doğrudan açılır. |
 
 ## Bilinen risk
 
