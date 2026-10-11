@@ -1,7 +1,7 @@
 import { NOTLAR } from '../data/notlar'
 
 /** Sevgi notlarının çıktığı yerler; bkz. docs/SEVGI-NOTLARI.md. */
-export type NoteContext = 'acilis' | 'gorev-tamamlandi' | 'buyuk-kutlama' | 'gun-sonu' | 'genel' | 'cicek'
+export type NoteContext = 'acilis' | 'gorev-tamamlandi' | 'buyuk-kutlama' | 'seviye' | 'gun-sonu' | 'genel' | 'cicek'
 
 // scripts/notlar.mjs içindeki anahtarla aynı olmalı.
 const KEY = 'pati-defteri-minik-notlar'

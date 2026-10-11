@@ -20,7 +20,7 @@ export function DayReview({ date, onLater, onFinished }: { date: ISODate; onLate
   const { data, today, act } = useApp()
   const [selected, setSelected] = useState<string[]>([])
   const [choosing, setChoosing] = useState<string | null>(null)
-  const [note] = useState(() => pickNote('gun-sonu'))
+  const [note] = useState(() => pickNote(date === today ? 'gun-sonu' : 'genel'))
   const earned = data.ledger.filter((e) => e.day === date)
   const xp = earned.reduce((sum, e) => sum + e.xp, 0)
   const pati = earned.reduce((sum, e) => sum + e.pati, 0)

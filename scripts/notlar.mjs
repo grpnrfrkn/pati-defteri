@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 const KEY = 'pati-defteri-minik-notlar'
 const PLAIN = 'notlar/sevgi-notlari.json'
 const ENCODED = 'src/data/notlar.ts'
-const CONTEXTS = ['acilis', 'gorev-tamamlandi', 'buyuk-kutlama', 'gun-sonu', 'genel', 'cicek']
+const CONTEXTS = ['acilis', 'gorev-tamamlandi', 'buyuk-kutlama', 'seviye', 'gun-sonu', 'genel', 'cicek']
 
 const mix = (bytes) => bytes.map((b, i) => b ^ KEY.charCodeAt(i % KEY.length))
 

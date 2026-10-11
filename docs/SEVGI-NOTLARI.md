@@ -76,6 +76,11 @@ Uygulamada parola yok (kullanıcı istemedi), bu yüzden notlar gerçek anlamda 
 * Çiçekler: uygulama açıldığında ya da bir görev tamamlandığında dörtte bir ihtimalle, ama en az iki gün arayla gelir. Gelen çiçekler notlarıyla birlikte Kedim sayfasında "Çiçeklerim" altında birikir.
 * Aynı anda tek sürpriz gösterilir: büyük kutlama, not ya da çiçek.
 
-**Durum:** kütüphanede benim yazdığım 50 not var (11 Ekim 2026). Çoğu `genel` altında; açılış, görev, kutlama, gün sonu ve çiçek bağlamlarına uygun olanlar ayrıca o bağlamlara da kondu. Zamanla artırılacak.
+**Durum (11 Ekim 2026):** kütüphanede iki kaynak var: benim yazdığım 50 not ve mesajlarımızdan yola çıkarak Gemini'ye yazdırıp gözden geçirdiğim bağlama özel notlar. Zamanla artırılacak.
 
-Bağlama özel notlar az olduğu için uygulama her seferinde yarı yarıya bağlamın kendi notlarından, yarı yarıya `genel` notlardan seçer. "Günaydın" ile başlayan not yalnızca açılışta çıkar.
+Bağlamlar: `acilis`, `gorev-tamamlandi`, `buyuk-kutlama`, `seviye` (kedi seviye atlayınca), `gun-sonu`, `cicek`, `genel`.
+
+* Bağlama özel notlar az olabildiği için uygulama her seferinde yarı yarıya bağlamın kendi notlarından, yarı yarıya `genel` notlardan seçer.
+* Kedinin seviye atladığını söyleyen notlar yalnızca `seviye` bağlamındadır; büyük bir iş bittiğinde seviye atlanmamış olabilir.
+* `gun-sonu` notları gece içindir ("iyi uykular" gibi). Geçmiş bir günün toparlaması ertesi gün yapılırsa `genel` not gösterilir.
+* Not taşıyan bildirim 9, not taşıyan kutlama 8 saniye ekranda kalır.

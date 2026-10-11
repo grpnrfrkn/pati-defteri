@@ -26,6 +26,8 @@ export interface CelebrationInfo {
   emoji: string
   title: string
   text?: string | null
+  /** Kutlamanın altında çıkan sevgi notu. */
+  note?: string | null
 }
 
 export type SheetState =

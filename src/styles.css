@@ -1315,3 +1315,14 @@ details summary {
     opacity: 0;
   }
 }
+
+.celebration-note {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--pink);
+  font-size: 0.95rem;
+}
+
+.celebration.long {
+  animation-duration: 8s;
+}

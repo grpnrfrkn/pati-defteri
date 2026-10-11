@@ -8,6 +8,7 @@ import { progressFor, xpToReach } from './domain/rewards'
 import type { Cat, Flower, ISODate } from './domain/types'
 import { CatPage } from './ui/CatPage'
 import { maybeGiveFlower } from './ui/complete'
+import { pickNote } from './ui/love'
 import { AppContext, type AppCtx, type AppData, type CelebrationInfo, type SheetState } from './ui/context'
 import { DayReview } from './ui/DayReview'
 import { MorePage } from './ui/MorePage'
@@ -43,6 +44,8 @@ interface Toast {
 
 /** Kutlamalar kısa sürer ve dokunmayı engellemez. */
 const CELEBRATION_MS = 3200
+/** Not taşıyan kutlama, okunabilsin diye daha uzun kalır. */
+const CELEBRATION_NOTE_MS = 8000
 
 function useData(): AppData | undefined {
   return useLiveQuery(async () => {
@@ -156,7 +159,8 @@ export function App() {
     clearTimeout(celebrationTimer.current)
     const id = Date.now()
     setCelebration({ ...info, id })
-    celebrationTimer.current = setTimeout(() => setCelebration((c) => (c?.id === id ? null : c)), CELEBRATION_MS)
+    const ms = info.note ? CELEBRATION_NOTE_MS : CELEBRATION_MS
+    celebrationTimer.current = setTimeout(() => setCelebration((c) => (c?.id === id ? null : c)), ms)
   }, [])
 
   const act = useCallback<AppCtx['act']>(
@@ -201,6 +205,7 @@ export function App() {
       text: grew
         ? `${data.cat.name} büyüdü: artık ${stageLabel.toLocaleLowerCase('tr')} bir kedi.`
         : `${data.cat.name} seninle gurur duyuyor.`,
+      note: pickNote('seviye'),
     })
   }, [level, data, celebrate])
 
@@ -271,7 +276,7 @@ export function App() {
       {sheet?.type === 'review' && <DayReview date={sheet.date} onLater={closeReview} onFinished={closeReview} />}
 
       {celebration && (
-        <div className="celebration" role="status" key={celebration.id}>
+        <div className={`celebration${celebration.note ? ' long' : ''}`} role="status" key={celebration.id}>
           <div className="confetti" aria-hidden>
             {Array.from({ length: 14 }, (_, i) => (
               <span key={i} style={{ left: `${(i * 37) % 100}%`, animationDelay: `${(i % 7) * 0.12}s` }}>
@@ -285,6 +290,7 @@ export function App() {
             </span>
             <strong>{celebration.title}</strong>
             {celebration.text && <span>{celebration.text}</span>}
+            {celebration.note && <span className="celebration-note">💌 {celebration.note}</span>}
           </div>
         </div>
       )}

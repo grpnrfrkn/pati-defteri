@@ -15,7 +15,7 @@ export async function maybeGiveFlower(ctx: AppCtx): Promise<boolean> {
   if (!note) return false
   const kind = pickFlower()
   await addFlower(kind, note)
-  ctx.celebrate({ emoji: kind, title: 'Sana bir çiçek var', text: note })
+  ctx.celebrate({ emoji: kind, title: 'Sana bir çiçek var', note })
   return true
 }
 
@@ -27,7 +27,7 @@ export async function completeAndCheer(ctx: AppCtx, item: Item, subtaskCount: nu
   const ok = await ctx.act(() => completeItem(item, on), `Tamamlandı 🐾  +${reward.xp} XP · +${reward.pati} pati`, note)
   if (!ok) return false
   // Aynı anda tek bir sürpriz: büyük kutlama, not ya da çiçek.
-  if (big) ctx.celebrate({ emoji: '🎉', title: 'Büyük bir iş bitti!', text: pickNote('buyuk-kutlama') })
+  if (big) ctx.celebrate({ emoji: '🎉', title: 'Büyük bir iş bitti!', note: pickNote('buyuk-kutlama') })
   else if (!note) await maybeGiveFlower(ctx).catch(() => false)
   return true
 }
