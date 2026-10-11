@@ -148,7 +148,8 @@ export function App() {
     clearTimeout(toastTimer.current)
     const id = Date.now()
     setToast({ id, message, undo, note })
-    toastTimer.current = setTimeout(() => setToast((t) => (t?.id === id ? null : t)), 5000)
+    // Not varsa okumaya vakit kalsın.
+    toastTimer.current = setTimeout(() => setToast((t) => (t?.id === id ? null : t)), note ? 9000 : 5000)
   }, [])
 
   const celebrate = useCallback((info: CelebrationInfo) => {
